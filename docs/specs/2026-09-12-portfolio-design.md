@@ -10,15 +10,15 @@ Instead of generic floating shapes, the WebGL background will be a stylized 3D v
 
 ### The Animation & Storytelling Flow (GSAP + WebGL)
 Because static mockups can't show motion, here is exactly how the site will animate and tell your story:
-1. **The Big Bang (Load)**: Screen starts black. A single 3D node appears and rapidly expands into the massive distributed network. The "Kashif Manzer" text aggressively scales and snaps into place.
-2. **The Fly-Through (Scroll)**: As the user scrolls down, the WebGL camera physically *flies through* the 3D network using GSAP ScrollTrigger scrubbing. The network rotates and warps around the user.
+1. **The Big Bang (Load)**: Screen starts black. A single 3D node appears and rapidly expands into the massive distributed network. A surreal, highly-detailed 3D model of a "Chimp-Human-AI Robot Hybrid" emerges in the center of the canvas, glowing and reacting to the data streams, setting a wildly creative and unexpected tone.
+2. **The Fly-Through (Scroll)**: As the user scrolls down, the WebGL camera physically *flies through* the 3D network using GSAP ScrollTrigger scrubbing. The network rotates and warps around the user, and the 3D creature dissolves into the data streams.
 3. **Routing the Timeline**: The vertical cyan timeline (seen in the mockup) literally "draws" itself down the screen like a data packet traveling through a wire. As it hits "Viasat" or "SettleMint", a cluster of 3D nodes in the background aggressively lights up to symbolize the scale of the systems you built there.
 4. **The Project Dive**: When reaching the projects section, the camera dives *inside* one of the glowing nodes, transitioning into a sleek, high-tech bento grid for NetLink and OmniAgent.
 
 ## Architecture & Tech Stack
 * **Framework**: Next.js 15 (App Router)
 * **Deployment**: Static HTML Export (`output: 'export'`) for GitHub Pages
-* **3D Rendering**: `@react-three/fiber` and `three`
+* **3D Rendering**: `@react-three/fiber`, `@react-three/drei` (for GLTF model loading), and `three`
 * **Animations**: `gsap` (ScrollTrigger for UI elements)
 * **Styling**: Tailwind CSS + `lucide-react` for minimalist icons
 
@@ -33,12 +33,13 @@ Initialize the Next.js environment and configure it for GitHub Pages deployment.
 
 ### 2. The WebGL Canvas (Background)
 * **`components/canvas/NetworkScene.tsx`**: The main R3F canvas setup.
+* **`components/canvas/HybridCreature.tsx`**: Loads and animates the 3D Chimp-Human-AI Robot hybrid GLTF/GLB model.
 * **`components/canvas/Nodes.tsx`**: Instanced meshes or particles representing microservices.
 * **`components/canvas/Connections.tsx`**: Line geometries connecting the nodes, with a shader material that pulses based on a time uniform.
 
 ### 3. UI Overlay Components
 * **`components/layout/Navbar.tsx`**: Fixed, glassmorphic header with links to sections, GitHub, and LinkedIn.
-* **`components/sections/Hero.tsx`**: Massive, bold typography introducing Kashif as a Backend & Infra Engineer.
+* **`components/sections/Hero.tsx`**: Bold typography introducing Kashif, overlaid on top of the 3D creature canvas.
 * **`components/sections/Experience.tsx`**: A vertical timeline mapping out SettleMint, CSULB, and Viasat, using GSAP to slide in on scroll.
 * **`components/sections/Projects.tsx`**: A bento grid showcasing NetLink and OmniAgent. Hovering over a card triggers a micro-animation.
 * **`components/sections/Skills.tsx`**: A continuous scrolling marquee of technologies (Go, Python, Terraform, Kubernetes, etc.).
@@ -52,7 +53,7 @@ We will build this app one self-contained ticket at a time. Once a ticket is com
 | Ticket | Depends on | Status | Summary |
 |--------|-----------|--------|---------|
 | `[T1]` | — | ⏳ todo | Setup Next.js, Tailwind, and GitHub Pages export config. Add basic layout structure. |
-| `[T2]` | T1 | ⏳ todo | Build the WebGL Canvas: Setup React Three Fiber, create the interactive 3D node network background. |
+| `[T2]` | T1 | ⏳ todo | Build the WebGL Canvas: Setup R3F, create the interactive 3D node network, and load the Chimp-Human-AI Hybrid 3D model. |
 | `[T3]` | T2 | ⏳ todo | Implement Hero & Navbar: Transparent navigation, bold typography, and initial GSAP load animations. |
 | `[T4]` | T3 | ⏳ todo | Build Experience Section: Timeline mapping out Viasat, SettleMint, and CSULB with scroll-triggered GSAP reveals. |
 | `[T5]` | T3 | ⏳ todo | Build Projects & Skills Sections: Bento grid for NetLink/OmniAgent and technical skills marquee. |
