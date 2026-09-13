@@ -125,7 +125,7 @@ export function MorphingSculpture() {
       p3[i3 + 2] = hRadius * Math.sin(hTheta + strand);
     }
     
-    return { pos1, pos2, pos3, randoms: r };
+    return { pos1: p1, pos2: p2, pos3: p3, randoms: r };
   }, [particleCount]);
 
   // Sync scroll to shader
