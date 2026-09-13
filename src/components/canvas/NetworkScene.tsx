@@ -1,7 +1,7 @@
 "use client";
 import { Canvas } from "@react-three/fiber";
 import { Nodes } from "./Nodes";
-import { QuantumCore } from "./QuantumCore";
+import { MorphingSculpture } from "./MorphingSculpture";
 import { Suspense } from "react";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
 
@@ -12,7 +12,7 @@ export function NetworkScene() {
         {/* Post-Processing Pipeline */}
         <EffectComposer disableNormalPass>
           <Bloom 
-            luminanceThreshold={1} 
+            luminanceThreshold={0.5} 
             mipmapBlur 
             intensity={1.5} 
           />
@@ -20,7 +20,7 @@ export function NetworkScene() {
         
         <Nodes />
         <Suspense fallback={null}>
-          <QuantumCore />
+          <MorphingSculpture />
         </Suspense>
       </Canvas>
     </div>
