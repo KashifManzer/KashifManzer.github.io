@@ -15,7 +15,9 @@ export function ChimpHologram() {
     let geo: THREE.BufferGeometry | null = null;
     obj.traverse((child) => {
       if ((child as THREE.Mesh).isMesh) {
-        geo = (child as THREE.Mesh).geometry;
+        // Clone to avoid mutating the cached loader object directly
+        geo = (child as THREE.Mesh).geometry.clone();
+        geo.center(); // Fixes the crazy offset bounding box of the OBJ file
       }
     });
     return geo;
