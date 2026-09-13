@@ -1,6 +1,7 @@
 import { NetworkScene } from "@/components/canvas/NetworkScene";
 import { Navbar } from "@/components/layout/Navbar";
 import { Hero } from "@/components/sections/Hero";
+import { Experience } from "@/components/sections/Experience";
 
 export default function Home() {
   return (
@@ -8,6 +9,7 @@ export default function Home() {
       <Navbar />
       <NetworkScene />
       <Hero />
+      <Experience />
     </main>
   );
 }
