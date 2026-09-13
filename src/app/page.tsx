@@ -7,7 +7,7 @@ import { Skills } from "@/components/sections/Skills";
 
 export default function Home() {
   return (
-    <main className="relative flex min-h-screen flex-col bg-background overflow-hidden">
+    <main className="relative flex min-h-screen flex-col bg-transparent overflow-hidden">
       <Navbar />
       <NetworkScene />
       <Hero />
