@@ -7,7 +7,13 @@ Create a top-tier, highly creative portfolio for Kashif Manzer, a backend and in
 Instead of generic floating shapes, the WebGL background will be a stylized 3D visualization of a distributed network. 
 * **The Canvas**: Glowing nodes connected by data streams. As the user moves the mouse, the camera subtly pans and data streams light up, simulating network traffic and packet routing.
 * **The UI**: Clean, mechanical typography (Industrial/Brutalist meets High-End Tech). Glassmorphic panels allow the 3D network to shine through.
-* **Animations**: GSAP will be used to orchestrate scroll-triggered reveals for the Experience and Projects sections, making the flat UI feel alive and connected to the canvas behind it.
+
+### The Animation & Storytelling Flow (GSAP + WebGL)
+Because static mockups can't show motion, here is exactly how the site will animate and tell your story:
+1. **The Big Bang (Load)**: Screen starts black. A single 3D node appears and rapidly expands into the massive distributed network. The "Kashif Manzer" text aggressively scales and snaps into place.
+2. **The Fly-Through (Scroll)**: As the user scrolls down, the WebGL camera physically *flies through* the 3D network using GSAP ScrollTrigger scrubbing. The network rotates and warps around the user.
+3. **Routing the Timeline**: The vertical cyan timeline (seen in the mockup) literally "draws" itself down the screen like a data packet traveling through a wire. As it hits "Viasat" or "SettleMint", a cluster of 3D nodes in the background aggressively lights up to symbolize the scale of the systems you built there.
+4. **The Project Dive**: When reaching the projects section, the camera dives *inside* one of the glowing nodes, transitioning into a sleek, high-tech bento grid for NetLink and OmniAgent.
 
 ## Architecture & Tech Stack
 * **Framework**: Next.js 15 (App Router)
