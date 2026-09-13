@@ -50,6 +50,15 @@ Initialize the Next.js environment and configure it for GitHub Pages deployment.
 
 We will build this app one self-contained ticket at a time. Once a ticket is complete, we verify it and mark it done before moving to the next.
 
+> [!IMPORTANT]
+> **Strict Execution Flow**
+> Every ticket executed must follow this philosophy (now enforced globally via `AGENTS.md`):
+> 1. **Analyze in-depth**: Ground your work with proof.
+> 2. **No assumptions**: Do not invent or assume things.
+> 3. **Research**: Do web searches for deeper insight or ideas when needed.
+> 4. **Exhaustive Testing**: Test until you can't test anymore. Do not be myopic with approaches or edge cases.
+> 5. **Re-audit**: Always re-audit for errors and missingness before calling a ticket done.
+
 | Ticket | Depends on | Status | Summary |
 |--------|-----------|--------|---------|
 | `[T1]` | — | ⏳ todo | Setup Next.js, Tailwind, and GitHub Pages export config. Add basic layout structure. |
