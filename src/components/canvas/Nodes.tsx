@@ -18,10 +18,12 @@ export function Nodes() {
   }, [count]);
 
   const speedRef = useRef(1);
+  const scaleRef = useRef(1);
 
   useEffect(() => {
     const handleBurst = () => {
       speedRef.current = 15; // Spike the speed
+      scaleRef.current = 3.5; // Spike the particle size
       if (pointsRef.current) {
         // Temporarily brighten the color to white
         (pointsRef.current.material as any).color.setHex(0xffffff);
@@ -36,9 +38,11 @@ export function Nodes() {
     if (pointsRef.current) {
       // Decay the burst speed back to normal smoothly
       speedRef.current += (1 - speedRef.current) * 0.05;
+      scaleRef.current += (1 - scaleRef.current) * 0.05;
       
       pointsRef.current.rotation.y -= 0.001 * speedRef.current;
       pointsRef.current.rotation.x += 0.0005 * speedRef.current;
+      (pointsRef.current.material as any).size = 0.05 * scaleRef.current;
       
       // Decay color back to cyan (#22d3ee is 0x22d3ee)
       if (speedRef.current > 1.1) {

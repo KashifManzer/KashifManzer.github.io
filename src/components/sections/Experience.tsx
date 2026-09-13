@@ -5,7 +5,6 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 export function Experience() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const lineRef = useRef<HTMLDivElement>(null);
 
   const jobs = [
     {
@@ -35,73 +34,62 @@ export function Experience() {
     if (mediaQuery.matches || !containerRef.current) return;
 
     const ctx = gsap.context(() => {
-      // Draw the timeline line
-      gsap.fromTo(
-        lineRef.current,
-        { scaleY: 0 },
-        {
-          scaleY: 1,
+      const cardEls = gsap.utils.toArray<HTMLElement>(".stack-card");
+      cardEls.forEach((card, i) => {
+        if (i === cardEls.length - 1) return;
+        ScrollTrigger.create({
+          trigger: card,
+          start: "top top",
+          endTrigger: cardEls[cardEls.length - 1],
+          end: "top top",
+          pin: true,
+          pinSpacing: false,
+          onEnter: () => window.dispatchEvent(new CustomEvent('network-burst')),
+          onEnterBack: () => window.dispatchEvent(new CustomEvent('network-burst'))
+        });
+        
+        gsap.to(card, {
+          scale: 0.85,
+          opacity: 0,
+          y: -50,
           ease: "none",
           scrollTrigger: {
-            trigger: containerRef.current,
-            start: "top center",
-            end: "bottom center",
+            trigger: cardEls[i + 1],
+            start: "top bottom",
+            end: "top top",
             scrub: true,
-          }
-        }
-      );
-
-      // Reveal jobs and trigger 3D WebGL burst
-      const jobEls = gsap.utils.toArray(".job-card");
-      jobEls.forEach((el: any) => {
-        gsap.fromTo(
-          el,
-          { opacity: 0, x: -30 },
-          {
-            opacity: 1,
-            x: 0,
-            duration: 0.8,
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: el,
-              start: "top 70%",
-              onEnter: () => {
-                // PONYTAIL: Dispatch native event to WebGL canvas
-                window.dispatchEvent(new CustomEvent('network-burst'));
-              }
-            }
-          }
-        );
+          },
+        });
       });
+
+      // trigger burst for the very last card
+      ScrollTrigger.create({
+        trigger: cardEls[cardEls.length - 1],
+        start: "top top",
+        onEnter: () => window.dispatchEvent(new CustomEvent('network-burst')),
+        onEnterBack: () => window.dispatchEvent(new CustomEvent('network-burst'))
+      });
+
     }, containerRef);
 
     return () => ctx.revert();
   }, []);
 
   return (
-    <section id="experience" ref={containerRef} className="relative z-10 w-full min-h-[100dvh] pt-32 pb-48 px-8 md:px-16 lg:px-24 pointer-events-none">
-      <div className="relative max-w-2xl pointer-events-auto">
-        <h2 className="text-3xl font-sans text-white mb-16 tracking-tight drop-shadow-[0_4px_16px_rgba(0,0,0,0.8)]">Experience</h2>
-        
-        <div className="relative border-l border-white/10 pl-8 md:pl-12 ml-4">
-          {/* The animated cyan line */}
-          <div ref={lineRef} className="absolute top-0 left-[-1px] w-[2px] h-full bg-neon-cyan origin-top shadow-[0_0_10px_rgba(34,211,238,0.5)]"></div>
-          
-          <div className="flex flex-col gap-24">
-            {jobs.map((job, i) => (
-              <div key={i} className="job-card relative">
-                {/* Timeline dot */}
-                <div className="absolute left-[-41px] md:left-[-57px] top-1 w-4 h-4 rounded-full bg-background border-2 border-neon-cyan shadow-[0_0_10px_rgba(34,211,238,0.8)]"></div>
-                
-                <p className="font-mono text-neon-cyan text-sm tracking-widest mb-2 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{job.date}</p>
-                <h3 className="text-2xl font-medium text-white mb-1 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{job.company}</h3>
-                <h4 className="text-white/60 mb-4 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{job.role}</h4>
-                <p className="text-white/90 leading-relaxed font-sans drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">{job.desc}</p>
-              </div>
-            ))}
+    <section id="experience" ref={containerRef} className="relative z-10 w-full pointer-events-none">
+      {jobs.map((job, i) => (
+        <div
+          key={i}
+          className="stack-card sticky top-0 min-h-[100dvh] flex flex-col justify-center px-8 md:px-16 lg:px-24 pointer-events-auto"
+        >
+          <div className="max-w-2xl bg-black/40 backdrop-blur-md border border-white/10 p-10 md:p-14 rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
+            <p className="font-mono text-neon-cyan text-sm tracking-widest mb-4 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{job.date}</p>
+            <h3 className="text-4xl md:text-5xl font-medium text-white mb-2 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{job.company}</h3>
+            <h4 className="text-xl md:text-2xl text-white/60 mb-6 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{job.role}</h4>
+            <p className="text-lg text-white/90 leading-relaxed font-sans drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">{job.desc}</p>
           </div>
         </div>
-      </div>
+      ))}
     </section>
   );
 }

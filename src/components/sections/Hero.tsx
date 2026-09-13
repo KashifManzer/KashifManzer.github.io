@@ -21,7 +21,7 @@ export function Hero() {
   }, []);
 
   return (
-    <section ref={containerRef} className="absolute inset-0 z-10 pointer-events-none">
+    <section ref={containerRef} className="relative z-10 w-full min-h-[100dvh] pointer-events-none">
       <div className="absolute bottom-8 left-8 md:bottom-16 md:left-16 lg:bottom-24 lg:left-24 max-w-xl pointer-events-auto">
         <h1 className="hero-element text-4xl md:text-6xl lg:text-7xl font-sans font-medium tracking-tight leading-[1.05] text-white drop-shadow-[0_4px_16px_rgba(0,0,0,0.8)]">
           Backend<br />Engineer.
