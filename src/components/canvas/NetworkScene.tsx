@@ -2,7 +2,7 @@
 import { Canvas } from "@react-three/fiber";
 import { Environment } from "@react-three/drei";
 import { Nodes } from "./Nodes";
-import { HybridCreature } from "./HybridCreature";
+import { ChimpHologram } from "./ChimpHologram";
 import { Suspense } from "react";
 
 export function NetworkScene() {
@@ -13,8 +13,7 @@ export function NetworkScene() {
         <directionalLight position={[10, 10, 5]} intensity={1} />
         <Nodes />
         <Suspense fallback={null}>
-          <HybridCreature />
-          <Environment preset="city" />
+          <ChimpHologram />
         </Suspense>
       </Canvas>
     </div>
