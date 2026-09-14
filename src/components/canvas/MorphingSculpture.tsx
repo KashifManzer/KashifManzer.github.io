@@ -64,7 +64,7 @@ void main() {
   
   // --- THE QUANTIZATION FIELD (MOUSE INTERACTION) ---
   float dist = distance(currentPos, uMouse);
-  float radius = 2.5; // Radius of the compiler field
+  float radius = 3.5; // Radius of the compiler field
   
   vQuantized = 0.0;
   vec3 finalColor = vec3(0.0);
@@ -118,54 +118,73 @@ export function MorphingSculpture() {
     const p3 = new Float32Array(particleCount * 3);
     const r = new Float32Array(particleCount * 3);
     
+    const clusters = 6;
+    const pointsPerCluster = Math.floor(particleCount / clusters);
+    const gridDim = Math.ceil(Math.cbrt(particleCount)); // ~37
+    const surfDim = Math.ceil(Math.sqrt(particleCount)); // ~224
+
     for (let i = 0; i < particleCount; i++) {
       const i3 = i * 3;
       
-      // Random chaos vectors
+      // Random chaos vectors for explosions
       r[i3 + 0] = (Math.random() - 0.5) * 2;
       r[i3 + 1] = (Math.random() - 0.5) * 2;
       r[i3 + 2] = (Math.random() - 0.5) * 2;
       
-      // SHAPE 1: Microservices Swarm (1 Core + 5 Orbiting Clusters)
-      const cluster = i % 6;
+      // ==========================================
+      // SHAPE 1: Microservices Swarm (Perfect Spheres)
+      // ==========================================
+      const c = Math.floor(i / pointsPerCluster);
       const u = Math.random();
       const v = Math.random();
-      const theta = u * 2.0 * Math.PI;
+      const theta = 2.0 * Math.PI * u;
       const phi = Math.acos(2.0 * v - 1.0);
       
-      if (cluster === 0) {
-        // Central Hub
-        const rad = Math.random() * 1.5;
+      if (c === 0) {
+        // Central Core (Large)
+        const rad = 1.8;
         p1[i3 + 0] = rad * Math.sin(phi) * Math.cos(theta);
         p1[i3 + 1] = rad * Math.sin(phi) * Math.sin(theta);
         p1[i3 + 2] = rad * Math.cos(phi);
       } else {
-        // Orbiting Microservices
-        const angle = (cluster / 5.0) * Math.PI * 2.0;
+        // 5 Orbiting Nodes
+        const rad = 0.6;
+        const angle = (c / 5.0) * Math.PI * 2.0;
         const cx = Math.cos(angle) * 3.5;
         const cz = Math.sin(angle) * 3.5;
-        const cy = (Math.random() - 0.5) * 2.0;
-        const rad = Math.random() * 0.8;
+        const cy = Math.sin(angle * 2.0) * 1.5; // Tilted orbit ring
+        
         p1[i3 + 0] = cx + (rad * Math.sin(phi) * Math.cos(theta));
         p1[i3 + 1] = cy + (rad * Math.sin(phi) * Math.sin(theta));
         p1[i3 + 2] = cz + (rad * Math.cos(phi));
       }
       
-      // SHAPE 2: The Monolith (Dense Rectangular Blockchain)
-      p2[i3 + 0] = (Math.random() - 0.5) * 2.0; // Width
-      p2[i3 + 1] = (Math.random() - 0.5) * 8.0; // Height (Very tall)
-      p2[i3 + 2] = (Math.random() - 0.5) * 2.0; // Depth
+      // ==========================================
+      // SHAPE 2: The Monolith (Perfect 3D Voxel Grid)
+      // ==========================================
+      const gx = i % gridDim;
+      const gy = Math.floor(i / gridDim) % gridDim;
+      const gz = Math.floor(i / (gridDim * gridDim));
       
-      // SHAPE 3: The Sorting Algorithm (Perfectly Ordered 3D Paraboloid Wave)
-      const row = Math.floor(i / 250); // 200 rows
-      const col = i % 250; // 250 cols
-      const x = (col / 250 - 0.5) * 10.0;
-      const z = (row / 200 - 0.5) * 10.0;
-      // Mathematical sorting visualization (a perfect 3D wave interference pattern)
-      const y = Math.sin(x * 1.5) * Math.cos(z * 1.5) * 1.5 - 2.0;
-      p3[i3 + 0] = x;
-      p3[i3 + 1] = y;
-      p3[i3 + 2] = z;
+      // Scale into a tall, imposing block
+      p2[i3 + 0] = (gx / gridDim - 0.5) * 3.0; // Width
+      p2[i3 + 1] = (gy / gridDim - 0.5) * 8.0; // Height
+      p2[i3 + 2] = (gz / gridDim - 0.5) * 3.0; // Depth
+      
+      // ==========================================
+      // SHAPE 3: The Sorting Algorithm (Perfect Ripple)
+      // ==========================================
+      const row = Math.floor(i / surfDim);
+      const col = i % surfDim;
+      const px = (col / surfDim - 0.5) * 12.0;
+      const pz = (row / surfDim - 0.5) * 12.0;
+      
+      const distance = Math.sqrt(px * px + pz * pz);
+      const py = Math.sin(distance * 2.0 - 5.0) * 1.5 - 2.0;
+      
+      p3[i3 + 0] = px;
+      p3[i3 + 1] = py;
+      p3[i3 + 2] = pz;
     }
     
     return { pos1: p1, pos2: p2, pos3: p3, randoms: r };
