@@ -1,0 +1,346 @@
+---
+import Base from "../layouts/Base.astro";
+---
+
+<Base
+  title="Kashif Manzer - Backend & Infrastructure Engineer"
+  description="Kashif Manzer builds backend and infrastructure systems: payments at national scale, research data platforms, and in-flight entertainment services."
+>
+  <div class="loader" aria-hidden="true">
+    <div class="loader-line"><span></span></div>
+    <p class="loader-count">0</p>
+  </div>
+
+  <canvas class="stage" aria-hidden="true"></canvas>
+
+  <header class="hud">
+    <a class="wordmark" href="#top">Kashif Manzer</a>
+    <nav class="pill" aria-label="Primary">
+      <a href="#work">Work</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero" data-stop>
+      <h1 class="reveal-hero">Kashif<br />Manzer</h1>
+      <div class="hero-side">
+        <p class="reveal-hero">
+          Backend and infrastructure engineer. I build the systems that keep payments, data, and in-flight
+          entertainment running.
+        </p>
+        <a class="cta reveal-hero" href="#work">See work</a>
+      </div>
+    </section>
+
+    <section id="work" class="dive" data-stop>
+      <p class="statement reveal">Five years in backend systems. It starts with payments.</p>
+    </section>
+
+    <section class="chapter" data-stop>
+      <article class="chapter-card reveal">
+        <p class="meta">SettleMint India <span>2021 - 2025</span></p>
+        <h2>Payments for 100M+ daily users</h2>
+        <p>
+          As a backend and infrastructure engineer, I designed Go and Python microservices for a national-scale,
+          regulated payments platform, with API pipelines built on Kafka and Redis.
+        </p>
+      </article>
+    </section>
+
+    <section id="contact" class="endcard">
+      <p class="reveal">
+        Next in the film: CSULB, Viasat, projects, and contact.
+        <span>This preview shows the first chapter only.</span>
+      </p>
+    </section>
+  </main>
+</Base>
+
+<script>
+  import { gsap } from "gsap";
+  import { createStage } from "../scene/core";
+  import { initScroll } from "../scene/scroll";
+  import { film } from "../scene/film";
+
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const loader = document.querySelector<HTMLElement>(".loader")!;
+  const bar = loader.querySelector<HTMLElement>(".loader-line span")!;
+  const count = loader.querySelector<HTMLElement>(".loader-count")!;
+
+  // Real progress only: each step reports when it has actually finished.
+  const counter = { v: 0 };
+  const progress = (p: number) => {
+    gsap.to(counter, {
+      v: p * 100,
+      duration: 0.5,
+      ease: "power2.out",
+      overwrite: true,
+      onUpdate: () => {
+        count.textContent = String(Math.round(counter.v));
+        bar.style.transform = `scaleX(${counter.v / 100})`;
+      },
+    });
+  };
+
+  const scroll = initScroll();
+  const canvas = document.querySelector<HTMLCanvasElement>(".stage")!;
+
+  async function boot() {
+    await document.fonts.ready;
+    progress(0.15);
+    const stage = await createStage(canvas, 34);
+    if (stage) await film(stage, scroll, progress);
+    else document.documentElement.classList.add("no-3d");
+    progress(1);
+    await new Promise((r) => setTimeout(r, reduced ? 0 : 550));
+    reveal();
+  }
+
+  function reveal() {
+    loader.classList.add("done");
+    if (reduced) return;
+    gsap.from(".reveal-hero", { y: 36, opacity: 0, filter: "blur(10px)", duration: 1.4, ease: "expo.out", stagger: 0.12, delay: 0.25 });
+    gsap.from(".hud > *", { y: -14, opacity: 0, duration: 1.1, ease: "expo.out", stagger: 0.08, delay: 0.6 });
+    gsap.utils.toArray<HTMLElement>(".reveal").forEach((el) => {
+      gsap.from(el, {
+        y: 48,
+        opacity: 0,
+        filter: "blur(8px)",
+        duration: 1.3,
+        ease: "expo.out",
+        scrollTrigger: { trigger: el, start: "top 80%" },
+      });
+    });
+  }
+
+  boot();
+</script>
+
+<style>
+  .loader {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-loader);
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 18px;
+    background: var(--void);
+    transition: opacity 1.1s var(--ease-out), visibility 1.1s;
+  }
+  .loader.done {
+    opacity: 0;
+    visibility: hidden;
+  }
+  .loader-line {
+    width: min(240px, 60vw);
+    height: 1px;
+    background: rgb(255 255 255 / 0.12);
+    overflow: hidden;
+  }
+  .loader-line span {
+    display: block;
+    height: 100%;
+    background: var(--ink);
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  .loader-count {
+    margin: 0;
+    font: 400 12px/1 var(--font-mono);
+    letter-spacing: 0.08em;
+    color: var(--ink-faint);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stage {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100lvh;
+    display: block;
+    z-index: var(--z-stage);
+  }
+
+  .hud {
+    position: fixed;
+    z-index: var(--z-hud);
+    inset: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px var(--gutter);
+  }
+  .wordmark {
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+  }
+  .pill {
+    display: flex;
+    gap: 2px;
+    padding: 4px;
+    border-radius: 999px;
+    background: var(--glass);
+    border: 1px solid var(--glass-edge);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08), 0 10px 30px rgb(0 0 0 / 0.35);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+  }
+  .pill a {
+    padding: 9px 16px;
+    border-radius: 999px;
+    font-size: 14px;
+    text-decoration: none;
+    color: var(--ink-soft);
+    transition: color 0.3s, background-color 0.3s;
+  }
+  .pill a:hover {
+    color: var(--ink);
+    background: rgb(255 255 255 / 0.08);
+  }
+
+  main {
+    position: relative;
+    z-index: var(--z-content);
+  }
+  section {
+    padding-inline: var(--gutter);
+  }
+
+  .hero {
+    min-height: 100dvh;
+    display: grid;
+    grid-template-columns: 1fr minmax(0, 24rem);
+    align-items: end;
+    gap: 2rem;
+    padding-block: 96px clamp(40px, 8vh, 88px);
+  }
+  h1 {
+    margin: 0;
+    font-size: clamp(3.4rem, 10.5vw, 9.5rem);
+    font-weight: 250;
+    letter-spacing: -0.055em;
+    line-height: 0.88;
+  }
+  .hero-side p {
+    margin: 0 0 1.75rem;
+    font-size: clamp(1rem, 1.25vw, 1.15rem);
+    line-height: 1.55;
+    color: var(--ink-soft);
+    text-wrap: pretty;
+  }
+  .cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 22px;
+    border-radius: 999px;
+    background: var(--ink);
+    color: var(--void);
+    font-weight: 500;
+    text-decoration: none;
+    transition: background-color 0.35s var(--ease-out), transform 0.35s var(--ease-out);
+  }
+  .cta:hover {
+    background: var(--ember);
+  }
+  .cta:active {
+    transform: translateY(1px);
+  }
+
+  .dive {
+    min-height: 120dvh;
+    display: grid;
+    align-items: center;
+  }
+  .statement {
+    max-width: 16ch;
+    margin: 0;
+    font-size: clamp(2.2rem, 5.4vw, 5rem);
+    font-weight: 300;
+    letter-spacing: -0.045em;
+    line-height: 1;
+    text-wrap: balance;
+    text-shadow: 0 2px 28px rgb(3 3 5 / 0.85);
+  }
+
+  .chapter {
+    min-height: 100dvh;
+    display: grid;
+    align-items: end;
+    justify-items: end;
+    padding-bottom: clamp(48px, 12vh, 120px);
+  }
+  .chapter-card {
+    max-width: 30rem;
+    padding: clamp(22px, 2.4vw, 32px);
+    border-radius: 22px;
+    background: rgb(8 9 12 / 0.55);
+    border: 1px solid var(--glass-edge);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06);
+    backdrop-filter: blur(18px) saturate(130%);
+    -webkit-backdrop-filter: blur(18px) saturate(130%);
+  }
+  .meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 0 0 1.25rem;
+    font: 400 13px/1.4 var(--font-mono);
+    color: var(--ink-soft);
+  }
+  .meta span {
+    color: var(--ember);
+    font-variant-numeric: tabular-nums;
+  }
+  h2 {
+    margin: 0 0 1rem;
+    font-size: clamp(1.9rem, 3.2vw, 2.7rem);
+    font-weight: 350;
+    letter-spacing: -0.04em;
+    line-height: 1.02;
+    text-wrap: balance;
+  }
+  .chapter-card p:last-child {
+    margin: 0;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    text-wrap: pretty;
+  }
+
+  .endcard {
+    min-height: 80dvh;
+    display: grid;
+    place-items: center;
+    text-align: center;
+  }
+  .endcard p {
+    max-width: 26ch;
+    margin: 0;
+    font-size: clamp(1.4rem, 2.4vw, 2rem);
+    font-weight: 300;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+  }
+  .endcard span {
+    display: block;
+    margin-top: 1rem;
+    font: 400 13px/1.4 var(--font-mono);
+    letter-spacing: 0;
+    color: var(--ink-faint);
+  }
+
+  @media (max-width: 760px) {
+    .hero {
+      grid-template-columns: 1fr;
+      align-content: end;
+      gap: 1.5rem;
+    }
+    .chapter {
+      justify-items: stretch;
+    }
+  }
+</style>

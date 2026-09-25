@@ -1,0 +1,57 @@
+@import "lenis/dist/lenis.css";
+
+:root {
+  --void: #030305;
+  --ink: #f2eee8;
+  --ink-soft: #b3aca3;
+  --ink-faint: #7d776f;
+  --ember: #ff8a3d;
+  --glass: rgb(255 255 255 / 0.06);
+  --glass-edge: rgb(255 255 255 / 0.14);
+
+  --font-sans: "Geist Variable", system-ui, sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, monospace;
+
+  --gutter: clamp(20px, 5vw, 72px);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* z-index scale */
+  --z-stage: 0;
+  --z-content: 1;
+  --z-hud: 10;
+  --z-loader: 20;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  background: var(--void);
+}
+body {
+  margin: 0;
+  background: var(--void);
+  color: var(--ink);
+  font-family: var(--font-sans);
+}
+::selection {
+  background: var(--ember);
+  color: var(--void);
+}
+:focus-visible {
+  outline: 1.5px solid var(--ember);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+a {
+  color: inherit;
+  text-underline-offset: 0.22em;
+}
+html {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255 255 255 / 0.2) transparent;
+}
