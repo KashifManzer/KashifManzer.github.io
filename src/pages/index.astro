@@ -6,6 +6,7 @@ import Base from "../layouts/Base.astro";
   title="Kashif Manzer - Backend & Infrastructure Engineer"
   description="Kashif Manzer builds backend and infrastructure systems: payments at national scale, research data platforms, and in-flight entertainment services."
 >
+  <noscript><style>.loader { display: none; }</style></noscript>
   <div class="loader" aria-hidden="true">
     <div class="loader-line"><span></span></div>
     <p class="loader-count">0</p>
@@ -59,7 +60,7 @@ import Base from "../layouts/Base.astro";
 
 <script>
   import { gsap } from "gsap";
-  import { createStage } from "../scene/core";
+  import { createStage, type Stage } from "../scene/core";
   import { initScroll } from "../scene/scroll";
   import { film } from "../scene/film";
 
@@ -86,18 +87,30 @@ import Base from "../layouts/Base.astro";
   const scroll = initScroll();
   const canvas = document.querySelector<HTMLCanvasElement>(".stage")!;
 
+  // Keyboard focus stays off the content while the loader covers it.
+  const covered = document.querySelectorAll<HTMLElement>("main, .hud");
+  covered.forEach((el) => (el.inert = true));
+
   async function boot() {
-    await document.fonts.ready;
-    progress(0.15);
-    const stage = await createStage(canvas, 34);
-    if (stage) await film(stage, scroll, progress);
-    else document.documentElement.classList.add("no-3d");
+    let stage: Stage | null = null;
+    try {
+      [, stage] = await Promise.all([document.fonts.ready, createStage(canvas, 34)]);
+      progress(0.15);
+      if (!stage) throw new Error("no WebGPU or WebGL2");
+      await film(stage, scroll, progress);
+    } catch (err) {
+      // The text is the site; the 3D is decoration. Any failure falls back to the plain page.
+      console.warn("[scene]", err);
+      stage?.renderer.setAnimationLoop(null);
+      document.documentElement.classList.add("no-3d");
+    }
     progress(1);
     await new Promise((r) => setTimeout(r, reduced ? 0 : 550));
     reveal();
   }
 
   function reveal() {
+    covered.forEach((el) => (el.inert = false));
     loader.classList.add("done");
     if (reduced) return;
     gsap.from(".reveal-hero", { y: 36, opacity: 0, filter: "blur(10px)", duration: 1.4, ease: "expo.out", stagger: 0.12, delay: 0.25 });
@@ -161,6 +174,9 @@ import Base from "../layouts/Base.astro";
     height: 100lvh;
     display: block;
     z-index: var(--z-stage);
+  }
+  :global(.no-3d) .stage {
+    display: none;
   }
 
   .hud {
