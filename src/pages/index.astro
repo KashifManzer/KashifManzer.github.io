@@ -91,6 +91,12 @@ import Base from "../layouts/Base.astro";
   const scroll = initScroll();
   const canvas = document.querySelector<HTMLCanvasElement>(".stage")!;
 
+  // At the very top nothing passes under the wordmark: drop the header scrim so the hero stays clear.
+  const hud = document.querySelector<HTMLElement>(".hud")!;
+  const syncHud = () => hud.classList.toggle("at-top", scrollY <= 8);
+  addEventListener("scroll", syncHud, { passive: true });
+  syncHud();
+
   // Keyboard focus stays off the content while the loader covers it.
   const covered = document.querySelectorAll<HTMLElement>("main, .hud, .skip");
   covered.forEach((el) => (el.inert = true));
@@ -191,6 +197,19 @@ import Base from "../layouts/Base.astro";
     align-items: center;
     justify-content: space-between;
     padding: 20px var(--gutter);
+  }
+  /* Scrim: content scrolling under the header fades out instead of colliding with the wordmark. */
+  .hud::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 -40px;
+    z-index: -1;
+    background: linear-gradient(to bottom, var(--void) 45%, rgb(3 3 5 / 0.7) 75%, transparent);
+    pointer-events: none;
+    transition: opacity 0.4s;
+  }
+  .hud.at-top::before {
+    opacity: 0;
   }
   .wordmark {
     font-size: 15px;
