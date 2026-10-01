@@ -1,0 +1,41 @@
+---
+import Base from "../layouts/Base.astro";
+---
+
+<Base title="Not found - Kashif Manzer" description="This page does not exist.">
+  <main>
+    <p>404</p>
+    <h1>Nothing here.</h1>
+    <a href="/">Back to the start</a>
+  </main>
+</Base>
+
+<style>
+  main {
+    min-height: 100dvh;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 1.25rem;
+    padding-inline: var(--gutter);
+    text-align: center;
+  }
+  p {
+    margin: 0;
+    font: 400 13px/1.4 var(--font-mono);
+    color: var(--ember);
+  }
+  h1 {
+    margin: 0;
+    font-size: clamp(2.2rem, 5.4vw, 5rem);
+    font-weight: 300;
+    letter-spacing: -0.045em;
+    line-height: 1;
+  }
+  a {
+    color: var(--ink-soft);
+  }
+  a:hover {
+    color: var(--ink);
+  }
+</style>
