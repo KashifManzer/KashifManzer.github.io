@@ -39,7 +39,7 @@ export async function film(stage: Stage, scroll: ScrollState, progress: (p: numb
   scene.environment = studioEnvironment(renderer);
   progress(0.35);
 
-  const core = createCrystal();
+  const core = createCrystal(tier);
   scene.add(core.group);
 
   // A dim ember glow far behind the core: something for the glass to bend.
@@ -111,6 +111,8 @@ export async function film(stage: Stage, scroll: ScrollState, progress: (p: numb
     const time = reducedMotion ? 0 : s.time;
     dust.step(reducedMotion ? 0 : dt, time, camera.position, rush, travel);
     city.set(ss(t, 0.3, 1.1), ss(t, 1.0, 1.95), time);
+    // Nothing of the city shows before the sketch starts at t = 0.3; skip drawing it.
+    city.group.visible = t > 0.25;
   });
 
   progress(1);
