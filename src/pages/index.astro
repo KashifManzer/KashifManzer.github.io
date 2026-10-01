@@ -6,7 +6,8 @@ import Base from "../layouts/Base.astro";
   title="Kashif Manzer - Backend & Infrastructure Engineer"
   description="Kashif Manzer, backend and infrastructure engineer: distributed services for national-scale payments, research data infrastructure, and in-flight entertainment automation."
 >
-  <noscript><style>.loader { display: none; }</style></noscript>
+  <!-- !important: beats the scoped .loader[data-astro-cid-*] rule. -->
+  <noscript><style>.loader { display: none !important; }</style></noscript>
   <div class="loader" aria-hidden="true">
     <div class="loader-line"><span></span></div>
     <p class="loader-count">0</p>
