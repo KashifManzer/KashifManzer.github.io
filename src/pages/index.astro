@@ -4,7 +4,7 @@ import Base from "../layouts/Base.astro";
 
 <Base
   title="Kashif Manzer - Backend & Infrastructure Engineer"
-  description="Kashif Manzer builds backend and infrastructure systems: payments at national scale, research data platforms, and in-flight entertainment services."
+  description="Kashif Manzer, backend and infrastructure engineer: distributed services for national-scale payments, research data infrastructure, and in-flight entertainment automation."
 >
   <noscript><style>.loader { display: none; }</style></noscript>
   <div class="loader" aria-hidden="true">
@@ -14,33 +14,39 @@ import Base from "../layouts/Base.astro";
 
   <canvas class="stage" aria-hidden="true"></canvas>
 
+  <a class="skip" href="#top">Skip to content</a>
+
   <header class="hud">
     <a class="wordmark" href="#top">Kashif Manzer</a>
     <nav class="pill" aria-label="Primary">
       <a href="#work">Work</a>
-      <a href="#contact">Contact</a>
     </nav>
   </header>
 
   <main id="top">
     <section class="hero" data-stop>
-      <h1 class="reveal-hero">Kashif<br />Manzer</h1>
+      <div>
+        <p class="eyebrow reveal-hero">
+          <span class="nowrap">Backend &amp; Infrastructure ·</span> <span class="nowrap">Distributed systems</span>
+        </p>
+        <h1 class="reveal-hero">Kashif<br />Manzer</h1>
+      </div>
       <div class="hero-side">
         <p class="reveal-hero">
-          Backend and infrastructure engineer. I build the systems that keep payments, data, and in-flight
-          entertainment running.
+          I build backend systems behind <span class="nowrap">national-scale</span> payments, research data,
+          and <span class="nowrap">in-flight</span> entertainment.
         </p>
         <a class="cta reveal-hero" href="#work">See work</a>
       </div>
     </section>
 
     <section id="work" class="dive" data-stop>
-      <p class="statement reveal">Five years in backend systems. It starts with payments.</p>
+      <p class="statement reveal">Backend systems since 2021. It starts with payments.</p>
     </section>
 
     <section class="chapter" data-stop>
       <article class="chapter-card reveal">
-        <p class="meta">SettleMint India <span>2021 - 2025</span></p>
+        <p class="meta">SettleMint India <span>2021–2025</span></p>
         <h2>Payments for 100M+ daily users</h2>
         <p>
           As a backend and infrastructure engineer, I designed Go and Python microservices for a national-scale,
@@ -49,11 +55,8 @@ import Base from "../layouts/Base.astro";
       </article>
     </section>
 
-    <section id="contact" class="endcard">
-      <p class="reveal">
-        Next in the film: CSULB, Viasat, projects, and contact.
-        <span>This preview shows the first chapter only.</span>
-      </p>
+    <section class="endcard">
+      <p class="reveal">Next in the film: CSULB, Viasat, projects, and contact.</p>
     </section>
   </main>
 </Base>
@@ -88,7 +91,7 @@ import Base from "../layouts/Base.astro";
   const canvas = document.querySelector<HTMLCanvasElement>(".stage")!;
 
   // Keyboard focus stays off the content while the loader covers it.
-  const covered = document.querySelectorAll<HTMLElement>("main, .hud");
+  const covered = document.querySelectorAll<HTMLElement>("main, .hud, .skip");
   covered.forEach((el) => (el.inert = true));
 
   async function boot() {
@@ -193,6 +196,26 @@ import Base from "../layouts/Base.astro";
     font-weight: 500;
     letter-spacing: -0.01em;
     text-decoration: none;
+    transition: color 0.3s;
+  }
+  .wordmark:hover {
+    color: var(--ember);
+  }
+  .skip {
+    position: fixed;
+    z-index: var(--z-loader);
+    top: 12px;
+    left: var(--gutter);
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: var(--ink);
+    color: var(--void);
+    font-size: 14px;
+    text-decoration: none;
+    transform: translateY(-200%);
+  }
+  .skip:focus-visible {
+    transform: none;
   }
   .pill {
     display: flex;
@@ -206,7 +229,7 @@ import Base from "../layouts/Base.astro";
     -webkit-backdrop-filter: blur(14px) saturate(140%);
   }
   .pill a {
-    padding: 9px 16px;
+    padding: 11px 18px;
     border-radius: 999px;
     font-size: 14px;
     text-decoration: none;
@@ -223,6 +246,8 @@ import Base from "../layouts/Base.astro";
     z-index: var(--z-content);
   }
   section {
+    max-width: 1600px;
+    margin-inline: auto;
     padding-inline: var(--gutter);
   }
 
@@ -233,6 +258,11 @@ import Base from "../layouts/Base.astro";
     align-items: end;
     gap: 2rem;
     padding-block: 96px clamp(40px, 8vh, 88px);
+  }
+  .eyebrow {
+    margin: 0 0 1.5rem;
+    font: 400 13px/1.4 var(--font-mono);
+    color: var(--ink-soft);
   }
   h1 {
     margin: 0;
@@ -247,6 +277,10 @@ import Base from "../layouts/Base.astro";
     line-height: 1.55;
     color: var(--ink-soft);
     text-wrap: pretty;
+    text-shadow: 0 2px 28px rgb(3 3 5 / 0.85);
+  }
+  .nowrap {
+    white-space: nowrap;
   }
   .cta {
     display: inline-flex;
@@ -340,13 +374,7 @@ import Base from "../layouts/Base.astro";
     font-weight: 300;
     letter-spacing: -0.03em;
     line-height: 1.2;
-  }
-  .endcard span {
-    display: block;
-    margin-top: 1rem;
-    font: 400 13px/1.4 var(--font-mono);
-    letter-spacing: 0;
-    color: var(--ink-faint);
+    text-shadow: 0 2px 28px rgb(3 3 5 / 0.85);
   }
 
   @media (max-width: 760px) {
