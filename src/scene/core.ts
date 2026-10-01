@@ -62,11 +62,14 @@ export async function createStage(canvas: HTMLCanvasElement, fov = 35): Promise<
 
   const pointer = new THREE.Vector2();
   const pointerTarget = new THREE.Vector2();
-  addEventListener(
-    "pointermove",
-    (e) => pointerTarget.set((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1),
-    { passive: true },
-  );
+  // Reduced motion: no pointer parallax, the pointer stays centred.
+  if (!reducedMotion) {
+    addEventListener(
+      "pointermove",
+      (e) => pointerTarget.set((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1),
+      { passive: true },
+    );
+  }
 
   const callbacks: Array<(dt: number, s: Stage) => void> = [];
   let render = () => renderer.render(scene, camera);

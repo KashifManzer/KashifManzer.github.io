@@ -75,7 +75,7 @@ export function createCity(tier: "high" | "low") {
     const on = smoothstep(front.sub(8), front.sub(22), length(p.xz));
     return tint.mul(inside).mul(lit).mul(side).mul(on).mul(1.7);
   })();
-  const towers = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1).translate(0, 0, 0), towerMat, mats.length);
+  const towers = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), towerMat, mats.length);
   mats.forEach((m, i) => towers.setMatrixAt(i, m));
   towers.frustumCulled = false;
   group.add(towers);

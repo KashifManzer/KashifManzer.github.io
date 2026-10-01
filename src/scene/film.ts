@@ -107,8 +107,10 @@ export async function film(stage: Stage, scroll: ScrollState, progress: (p: numb
     glow.lookAt(camera.position);
 
     const rush = ss(t, 0.15, 0.55) * (1 - ss(t, 0.85, 1.35));
-    dust.step(reducedMotion ? 0 : dt, s.time, camera.position, rush, travel);
-    city.set(ss(t, 0.3, 1.1), ss(t, 1.0, 1.95), s.time);
+    // Reduced motion: frozen clock, so traffic, window flips and dust twinkle hold still.
+    const time = reducedMotion ? 0 : s.time;
+    dust.step(reducedMotion ? 0 : dt, time, camera.position, rush, travel);
+    city.set(ss(t, 0.3, 1.1), ss(t, 1.0, 1.95), time);
   });
 
   progress(1);
