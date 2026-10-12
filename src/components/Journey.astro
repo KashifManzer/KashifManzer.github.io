@@ -1,0 +1,251 @@
+---
+import Base from '../layouts/Base.astro';
+import Contact from './Contact.astro';
+import { profile } from '../data/profile';
+import { districtTechnologies, technologies } from '../scene/cinematic/technologies';
+const chapters = [
+  { id: 'opening', time: 0, span: 3, screens: 1, label: 'The perspective', title: 'Engineering\nconnections.', copy: 'Backend & Infrastructure Engineer. I build distributed systems and cloud infrastructure in Go and Python.', poster: 'opening' },
+  { id: 'approach', time: 3, span: 4, screens: 1.5, label: '01 / Our destination', title: 'A little closer\nto home.', copy: 'Software connects services, infrastructure, and the people who depend on them.', poster: 'approach' },
+  { id: 'arrival', time: 7, span: 2, screens: 1, label: '02 / Earth orbit', title: 'Systems that\nconnect us.', copy: 'I build the software behind payments, research data, and in-flight entertainment.', poster: 'arrival' },
+  { id: 'descent', time: 9, span: 3, screens: 1, label: '03 / From orbit to infrastructure', title: 'Follow\nthe signal.', copy: 'My journey starts on the ground.', poster: 'descent' },
+  { id: 'career', time: 12, span: 2, screens: 1.5, label: '2021—2025 / SettleMint India', title: 'Behind every\ntransaction.', copy: 'Distributed microservices in Go and Python for a national-scale regulated payments platform. API pipelines built on Kafka and Redis.', poster: 'career' },
+  { id: 'research', time: 14, span: 2, screens: 1.5, label: '2025—2026 / CSULB Institutional Research', title: 'Making data\ndependable.', copy: 'Backend data infrastructure in Go and Python. Services containerized with Docker and Kubernetes, instrumented with Prometheus and Grafana.', poster: 'research' },
+  { id: 'viasat', time: 16, span: 2, screens: 1.5, label: '2026 / Viasat · Software Engineer Intern', title: 'Better experiences.\nAt altitude.', copy: 'A Python AI agent built with Google ADK to automate pre-warming of high-demand in-flight entertainment titles, orchestrated on GCP Cloud Run.', poster: 'viasat' },
+];
+---
+<Base title="Kashif Manzer — Backend & Infrastructure Engineer" description={profile.description} isProfile>
+  <script is:inline>document.documentElement.classList.add('journey-ready'); if (matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('reduced');</script>
+  <a class="skip" href="#work">Skip to work</a>
+  <div class="journey-stage" aria-hidden="true"><canvas id="journey-canvas"></canvas><div class="scene-scrim"></div><div id="cloud-veil"></div></div>
+  <header class="site-header">
+    <a href="#opening" class="wordmark">Kashif Manzer<span> / </span></a>
+    <nav class="desktop-nav" aria-label="Main navigation"><a href="#career">Experience</a><a href="#work">Selected work</a><a href="#contact">Contact</a></nav>
+    <div class="header-controls"><button id="reduce-motion" hidden aria-pressed="false">Reduce motion</button><details class="mobile-menu"><summary>Menu</summary><nav aria-label="Mobile navigation"><a href="#career">Experience</a><a href="#work">Selected work</a><a href="#contact">Contact</a></nav></details></div>
+  </header>
+  <main>
+    {chapters.map((chapter, index) => <section id={chapter.id} class:list={['chapter', chapter.id]} data-time={chapter.time} data-span={chapter.span} style={`--screens:${chapter.screens}`} aria-labelledby={`${chapter.id}-title`}>
+      <div class="chapter-sticky">
+        <picture class="chapter-poster" aria-hidden="true"><source media="(max-width:700px)" srcset={`/direction/${chapter.poster}-mobile.webp`} /><img src={`/direction/${chapter.poster}-desktop.webp`} width="1440" height="900" alt="" loading={index ? 'lazy' : 'eager'} /></picture>
+        <div class="chapter-copy">
+          {index > 3 && <p class="eyebrow">{chapter.label}</p>}
+          {index === 0 ? <h1 id="opening-title">Kashif Manzer{' '}<span class="hero-tagline">Engineering connections.</span></h1> : <h2 id={`${chapter.id}-title`}>{chapter.title}</h2>}
+          <p class="description">{chapter.copy}</p>
+
+          {districtTechnologies[chapter.id] && <div class="technology-controls" aria-label="Inspect technology sculptures">
+            {districtTechnologies[chapter.id].map(id => <button hidden data-technology={id} aria-haspopup="dialog" aria-controls="logo-inspection"><span>{technologies[id].name}</span><span aria-hidden="true">↗</span></button>)}
+          </div>}
+          {index === 0 && <><div class="hero-actions"><a class="primary-action" href="#work">View work</a><a href="#contact">Connect <span aria-hidden="true">↗</span></a></div><a class="begin" href="#approach"><span aria-hidden="true">↓</span> Scroll to approach Earth</a></>}
+          {chapter.id === 'arrival' && <a class="text-link" href="/observatory/#solar-system">Explore the planets ↗</a>}
+        </div>
+      </div>
+    </section>)}
+    <section id="work" class="work" aria-labelledby="work-title" tabindex="-1">
+      <div class="work-heading"><h2 id="work-title">Systems,<br /><em>in practice.</em></h2><p>Two projects in infrastructure automation and AI-driven governance.</p></div>
+      <article class="project"><div><p class="eyebrow">Network automation</p><h3>NetLink</h3><p>Terraform-driven VPC provisioning across three AWS regions. Go microservices apply configurations, probe latency, and detect drift.</p><p class="stack">Go / Python / Terraform / AWS / Prometheus</p></div><div class="network-diagram" aria-hidden="true"><i>01</i><i>02</i><i>03</i><span>AWS · THREE REGIONS</span></div></article>
+      <article class="project"><div><p class="eyebrow">AI-driven governance</p><h3>OmniAgent</h3><p>Concurrency-safe job scheduling and caching for LLM-driven proposal evaluations. A full-stack platform containerized on Kubernetes.</p><p class="stack">React / Flask / PostgreSQL / LLMs / Kubernetes</p></div><div class="queue-diagram" aria-hidden="true"><i></i><i></i><i></i><span>LLM EVALUATION JOBS</span></div></article>
+      <Contact />
+      <footer><span>Kashif Manzer · Backend & Infrastructure</span><a href="#opening">Back to the stars ↑</a><a href="/textures/cinematic/ATTRIBUTION.txt">Scene credits</a><a href="/logos/ATTRIBUTION.txt">Logo credits</a></footer>
+    </section>
+  </main>
+  <dialog id="logo-inspection" aria-labelledby="logo-title" aria-describedby="logo-description">
+    <div class="logo-heading"><div><p class="eyebrow">Technology / A closer look</p><h2 id="logo-title"></h2></div><button class="logo-close" autofocus aria-label="Close technology inspection">Close <span aria-hidden="true">×</span></button></div>
+    <div class="logo-viewport" role="img" aria-label="Interactive technology sculpture. Drag to rotate, pinch to zoom, or use the controls below."></div>
+    <div class="logo-details"><p id="logo-description"></p><p class="logo-instructions">Drag to rotate · Scroll or pinch to zoom</p></div>
+    <div class="logo-controls" role="group" aria-label="Sculpture view controls">
+      <button data-logo-action="left" aria-label="Rotate left">←</button><button data-logo-action="right" aria-label="Rotate right">→</button>
+      <button data-logo-action="up" aria-label="Rotate up">↑</button><button data-logo-action="down" aria-label="Rotate down">↓</button>
+      <button data-logo-action="in" aria-label="Zoom in">+</button><button data-logo-action="out" aria-label="Zoom out">−</button><button data-logo-action="reset">Reset view</button>
+    </div>
+  </dialog>
+  <div class="flight-hud" aria-hidden="true"><span id="flight-chapter">SOLAR SYSTEM</span><div class="flight-track"><i id="flight-progress"></i></div><span id="flight-percent">00</span></div>
+  <p id="journey-status" class="status" role="status"></p>
+</Base>
+<script>
+  const begin = () => { void import('../scene/cinematic/journey').catch(() => { document.documentElement.classList.remove('journey-ready'); document.querySelector('#journey-status')!.textContent = 'Showing the illustrated portfolio.'; }); };
+  // Paint readable HTML before fetching and compiling the optional 3D engine.
+  const afterPaint = () => requestAnimationFrame(() => requestAnimationFrame(begin));
+  if (document.readyState === 'complete') afterPaint(); else addEventListener('load', afterPaint, { once: true });
+</script>
+<style>
+  :global(html) { scroll-padding-top:0; }
+  .skip { position:fixed; top:12px; left:20px; z-index:50; transform:translateY(-200%); padding:14px; background:#10202c; }
+  .skip:focus { transform:none; }
+  .journey-stage { position:fixed; inset:0; pointer-events:none; z-index:0; }
+  canvas { display:block; width:100%; height:100%; opacity:0; }
+  :global([data-graphics="ready"]) canvas { opacity:1; }
+  .scene-scrim { position:absolute; inset:0; background:linear-gradient(0deg,#02070d75,transparent 55%),linear-gradient(90deg,#02070da8,transparent 64%); }
+  #cloud-veil { position:absolute; inset:0; opacity:0; background:radial-gradient(ellipse at 65% 70%,#d8e6ef,#93aabc 75%,#6e8a9d); }
+  .site-header { position:fixed; inset:0 0 auto; z-index:10; display:flex; justify-content:space-between; align-items:center; padding:28px 5vw; background:linear-gradient(#030912ad,transparent); }
+  .wordmark { font-size:15px; font-weight:550; text-decoration:none; letter-spacing:-.03em; }
+  .wordmark span { padding-left:15px; color:#7e9bae; }
+  nav { display:flex; align-items:center; gap:30px; font-size:12px; }
+  nav a { text-decoration:none; }
+  .header-controls button { font-size:11px; border:1px solid #677f8c66; padding:10px 14px; border-radius:30px; }
+  .header-controls button[aria-pressed="true"] { color:#aadfee; border-color:currentColor; }
+  main { position:relative; z-index:1; }
+  .chapter { position:relative; min-height:100svh; }
+  .chapter-sticky { position:relative; min-height:100svh; display:flex; align-items:center; padding:130px 7vw 120px; isolation:isolate; }
+  .chapter-sticky::before { content:''; position:absolute; inset:0; background:linear-gradient(90deg,#02070dcc,transparent 66%); z-index:-1; pointer-events:none; }
+  .chapter-poster { position:absolute; inset:0; z-index:-2; }
+  .chapter-poster img { width:100%; height:100%; object-fit:cover; }
+  :global(.journey-ready:not(.reduced)) .chapter { height:calc(var(--screens) * 100svh); }
+  :global(.journey-ready:not(.reduced)) .chapter-sticky { position:sticky; top:0; height:100svh; }
+  :global([data-graphics="ready"]) .chapter-poster { visibility:hidden; }
+  .chapter-copy { width:min(600px,48%); will-change:opacity; }
+  :global([data-graphics="ready"]) .chapter-sticky::before { display:none; }
+  :global([data-graphics="ready"].journey-ready:not(.reduced)) .chapter-copy { position:fixed; left:7vw; top:50%; transform:translateY(-50%); width:min(600px,48vw); }
+  :global([data-graphics="ready"].journey-ready:not(.reduced)) .opening .chapter-copy { top:auto; bottom:120px; transform:none; width:60vw; }
+  .eyebrow { font:10px/1.8 var(--font-mono); text-transform:uppercase; letter-spacing:.14em; color:#acc4d2; margin:0 0 25px; }
+  h1,h2,h3 { margin:0; font-weight:430; letter-spacing:-.035em; }
+  h1,h2 { white-space:pre-line; font-size:clamp(48px,6.3vw,96px); line-height:1.05; }
+  h1 em,h2 em { font-family:Georgia,serif; font-weight:400; letter-spacing:-.035em; color:#c5e5ee; }
+  .opening .chapter-sticky { align-items:flex-end; }
+  .opening .chapter-sticky::before { background:linear-gradient(0deg,#02070deb,transparent 80%); }
+  .opening .chapter-copy { width:60%; }
+  .description { margin:25px 0 0; max-width:36ch; color:#c0cfda; font-size:16px; line-height:1.75; }
+  .begin { display:inline-flex; align-items:center; gap:16px; margin-top:32px; font:10px var(--font-mono); letter-spacing:.04em; text-decoration:none; }
+  .begin span { display:grid; place-items:center; width:32px; height:44px; border:1px solid #afcbdc66; border-radius:22px; font-size:18px; }
+  .stack { font:10px/1.8 var(--font-mono); color:#9bbdca; margin:25px 0 0; }
+  .technology-controls { display:flex; flex-wrap:wrap; gap:8px; margin-top:20px; max-width:430px; }
+  .technology-controls:empty { display:none; }
+  .technology-controls button { display:inline-flex; gap:14px; align-items:center; justify-content:space-between; min-height:44px; padding:9px 13px; border:1px solid #a1bac445; border-radius:3px; background:#08131cbb; color:#e5edf0; font-size:11px; }
+  .technology-controls button[hidden] { display:none; }
+  .technology-controls button:hover { background:#203747; border-color:#b9dae2; }
+  :global(html.logo-inspecting) { overflow:hidden; scrollbar-gutter:stable; }
+  #logo-inspection { width:min(1000px,calc(100vw - 48px)); height:min(850px,calc(100dvh - 48px)); max-width:none; max-height:none; padding:0; border:1px solid #78919e66; border-radius:12px; background:#101c29; color:#ecf2f4; overflow:auto; }
+  #logo-inspection[open] { display:flex; flex-direction:column; }
+  #logo-inspection::backdrop { background:#01050ddd; backdrop-filter:blur(12px); }
+  .logo-heading { display:flex; align-items:start; justify-content:space-between; gap:20px; padding:28px 32px 0; }
+  .logo-heading .eyebrow { margin-bottom:10px; }
+  .logo-heading h2 { font-size:36px; }
+  .logo-close { border:1px solid #98aeba66; padding:12px 16px; border-radius:4px; font-size:12px; min-height:44px; }
+  .logo-close span { margin-left:14px; font-size:18px; }
+  .logo-viewport { position:relative; flex:1; min-height:180px; overflow:hidden; }
+  .logo-viewport canvas { width:100%; height:100%; touch-action:none; opacity:1; }
+  .logo-details { padding:0 32px; max-width:650px; margin:auto; text-align:center; }
+  .logo-details p { color:#c5d4df; font-size:14px; line-height:1.6; }
+  .logo-details .logo-instructions { font:10px var(--font-mono); color:#a3bbc8; }
+  .logo-controls { display:flex; justify-content:center; gap:8px; flex-wrap:wrap; padding:16px 20px 26px; }
+  .logo-controls button { min-width:44px; min-height:44px; padding:10px; border:1px solid #829aa955; border-radius:4px; }
+  .logo-controls button:last-child { font-size:11px; padding-inline:15px; }
+  .logo-controls button:hover,.logo-close:hover { background:#2b4456; }
+  .text-link { display:inline-block; margin-top:24px; font-size:12px; }
+  .descent .chapter-copy { max-width:460px; }
+  .career h2,.research h2,.viasat h2 { font-size:clamp(42px,5vw,74px); }
+  .career .chapter-sticky::before,.research .chapter-sticky::before,.viasat .chapter-sticky::before { background:linear-gradient(90deg,#020810ed,#02081088 35%,transparent 70%); }
+  .work { position:relative; background:#070e16; padding:120px 7vw 32px; }
+  .work-heading { display:grid; grid-template-columns:1fr 1fr; gap:24px 10%; align-items:end; padding-bottom:80px; }
+  .work-heading>p:last-child { max-width:32ch; color:#aebecb; line-height:1.8; }
+  .project { border-top:1px solid #7995a233; display:grid; grid-template-columns:1fr .8fr; gap:30px; padding:64px 0; align-items:center; }
+  .project .eyebrow { margin-bottom:14px; }
+  h3 { font-size:48px; }
+  .project p:not(.eyebrow):not(.stack) { color:#b8c7d2; max-width:50ch; font-size:15px; line-height:1.8; }
+  .network-diagram,.queue-diagram { position:relative; display:flex; align-items:center; justify-content:space-between; height:160px; margin-left:30px; background:linear-gradient(transparent 49.5%,#587c9255 50%,transparent 50.5%); }
+  .network-diagram i { display:grid; place-items:center; width:56px; height:56px; border:1px solid #6d9aaf88; background:#0b1721; border-radius:50%; font:10px var(--font-mono); color:#a0c6d8; }
+  .network-diagram span,.queue-diagram span { position:absolute; left:0; bottom:0; font:8px var(--font-mono); letter-spacing:.12em; color:#8aabbf; }
+  .queue-diagram i { display:block; height:72px; width:25%; border:1px solid #5c7e92; background:repeating-linear-gradient(0deg,transparent 0 12px,#69859833 12px 13px); transform:skewY(-12deg); }
+  footer { border-top:1px solid #7995a233; padding-top:30px; display:flex; justify-content:space-between; gap:24px; font-size:11px; color:#a1b6c4; flex-wrap:wrap; }
+  .flight-hud { position:fixed; bottom:28px; right:5vw; display:none; align-items:center; gap:18px; z-index:5; font:9px var(--font-mono); letter-spacing:.12em; color:#b3c9d7; pointer-events:none; }
+  :global(.journey-ready) .flight-hud { display:flex; }
+  .flight-track { width:90px; height:1px; background:#6b8fa34d; }
+  .flight-track i { display:block; height:1px; width:100%; background:#b1dce8; transform:scaleX(0); transform-origin:left; }
+  .status { position:fixed; bottom:10px; left:5vw; z-index:10; font:9px var(--font-mono); color:#adc4d3; margin:0; }
+  @media(max-width:700px) {
+    .scene-scrim { background:linear-gradient(0deg,#030a13f0,#030a1366 35%,transparent 78%); }
+    :global([data-graphics="ready"].journey-ready:not(.reduced)) .chapter-copy,
+    :global([data-graphics="ready"].journey-ready:not(.reduced)) .opening .chapter-copy { top:auto; bottom:100px; left:26px; right:26px; width:auto; transform:none; }
+    :global([data-graphics="ready"].journey-ready:not(.reduced)) .approach .chapter-copy,
+    :global([data-graphics="ready"].journey-ready:not(.reduced)) .descent .chapter-copy { top:110px; bottom:auto; }
+    .site-header { padding:20px 24px; flex-wrap:wrap; gap:16px; }
+    .wordmark { font-size:13px; }
+    .wordmark span { display:none; }
+    nav { gap:14px; font-size:10px; }
+    .header-controls button { padding:7px 9px; font-size:9px; }
+
+    .chapter-sticky { padding:110px 26px 100px; align-items:flex-end; }
+    .chapter-copy,.opening .chapter-copy { width:100%; }
+    h1,h2,.career h2,.research h2,.viasat h2 { font-size:clamp(38px,11vw,66px); }
+    .description { font-size:13px; margin-top:20px; max-width:36ch; }
+    .eyebrow { font-size:9px; margin-bottom:18px; }
+    .stack { font-size:9px; margin-top:20px; }
+    .technology-controls { gap:6px; margin-top:14px; }
+    .technology-controls button { font-size:10px; padding:8px 10px; gap:8px; }
+    .career h2,.research h2,.viasat h2 { font-size:clamp(32px,9vw,44px); }
+    .career .description,.research .description,.viasat .description { font-size:12px; line-height:1.6; margin-top:15px; }
+    #logo-inspection { width:calc(100vw - 20px); height:calc(100dvh - 20px); }
+    .logo-heading { padding:20px 18px 0; }
+    .logo-heading h2 { font-size:28px; }
+    .logo-heading .eyebrow { font-size:8px; }
+    .logo-details { padding:0 20px; }
+    .logo-details p { font-size:12px; }
+    .chapter-sticky::before,.career .chapter-sticky::before,.research .chapter-sticky::before,.viasat .chapter-sticky::before { background:linear-gradient(0deg,#030a13fa,#030a13a8 35%,transparent 80%); }
+    .approach .chapter-sticky,.descent .chapter-sticky { align-items:flex-start; }
+    .approach .chapter-sticky::before,.descent .chapter-sticky::before { background:linear-gradient(#030a1380,transparent 75%); }
+    .begin { margin-top:24px; }
+    .flight-hud { bottom:22px; right:26px; font-size:8px; gap:12px; }
+    .work { padding:90px 26px 30px; }
+    .work-heading { display:block; padding-bottom:48px; }
+    .work-heading h2 { margin-top:20px; }
+    .project { grid-template-columns:1fr; gap:12px; padding:40px 0; }
+    .project h3 { font-size:36px; }
+    .project p:not(.eyebrow):not(.stack) { font-size:13px; }
+    .network-diagram,.queue-diagram { grid-column:1; height:130px; margin-left:0; }
+    footer { font-size:10px; }
+  }
+  @media(max-height:600px) and (min-width:701px) {
+    :global([data-graphics="ready"].journey-ready:not(.reduced)) .chapter-copy { top:80px; transform:none; width:55vw; }
+    :global([data-graphics="ready"].journey-ready:not(.reduced)) .opening .chapter-copy { bottom:60px; }
+    .site-header { padding-block:16px; }
+    .chapter-sticky { padding-block:80px; }
+    h1,h2,.career h2,.research h2,.viasat h2 { font-size:38px; }
+    .description { font-size:12px; margin-top:15px; }
+    .eyebrow { margin-bottom:12px; }
+    .stack,.begin { margin-top:15px; }
+    .technology-controls { margin-top:10px; gap:5px; }
+    .technology-controls button { padding:6px 9px; font-size:10px; }
+    .career h2,.research h2,.viasat h2 { font-size:32px; }
+    .career .stack,.research .stack,.viasat .stack { margin-top:8px; }
+  }
+
+  .site-header { padding-top:max(16px,env(safe-area-inset-top)); padding-left:max(5vw,env(safe-area-inset-left)); padding-right:max(5vw,env(safe-area-inset-right)); }
+  .wordmark,nav a,.header-controls button,summary { min-height:44px; display:inline-flex; align-items:center; }
+  nav a { padding:8px 4px; }
+  .header-controls { display:flex; align-items:center; gap:12px; }
+  .mobile-menu { display:none; }
+  h1 { font-size:clamp(42px,5.6vw,80px); }
+  .hero-tagline { display:block; font-size:clamp(20px,2.5vw,36px); margin-top:18px; letter-spacing:-.02em; color:#b9dbe6; }
+  .opening .description { max-width:42ch; font-size:16px; line-height:1.7; }
+  .hero-actions { display:flex; align-items:center; gap:22px; margin-top:24px; }
+  .hero-actions a { display:inline-flex; min-height:44px; align-items:center; padding:12px 18px; text-decoration:none; font-size:14px; gap:12px; }
+  .primary-action { background:var(--ink); color:var(--void); border-radius:4px; }
+  .primary-action:hover { background:#c5e5ee; color:var(--void); }
+  .begin { margin-top:24px; min-height:44px; }
+  .project { gap:48px; }
+  @media(max-width:700px) {
+    .site-header { gap:8px; padding:12px max(16px,env(safe-area-inset-right)) 12px max(16px,env(safe-area-inset-left)); }
+    .desktop-nav { display:none; }
+    .header-controls { gap:8px; }
+    .header-controls button { font-size:10px; padding:8px 10px; }
+    .mobile-menu { display:block; }
+    summary { padding:8px 10px; cursor:pointer; font-size:12px; border:1px solid var(--edge); border-radius:4px; }
+    .mobile-menu nav { position:absolute; top:68px; right:16px; display:grid; gap:4px; min-width:190px; padding:12px; background:#0c1926; border:1px solid var(--edge); border-radius:6px; }
+    .mobile-menu nav a { font-size:14px; padding:10px 16px; }
+    .opening .description { font-size:13px; }
+    .hero-tagline { font-size:23px; margin-top:14px; }
+    .hero-actions { margin-top:20px; gap:8px; }
+    .hero-actions a { font-size:12px; padding:10px 14px; }
+    .begin { margin-top:16px; }
+    .project { gap:20px; }
+  }
+  @media(max-height:600px) and (min-width:701px) {
+    h1 { font-size:42px; } .hero-tagline { font-size:24px; margin-top:8px; }
+    .opening .description { font-size:13px; margin-top:12px; }
+    .hero-actions { margin-top:12px; } .begin { margin-top:8px; }
+  }
+</style>
+<script>
+  const menu = document.querySelector<HTMLDetailsElement>('.mobile-menu');
+  menu?.addEventListener('click', event => { if ((event.target as HTMLElement).closest('a')) menu.open = false; });
+  document.addEventListener('keydown', event => { if(event.key === 'Escape' && menu?.open) { menu.open = false; menu.querySelector('summary')?.focus(); } });
+  document.addEventListener('click', event => { if(menu?.open && !menu.contains(event.target as Node)) menu.open = false; });
+</script>

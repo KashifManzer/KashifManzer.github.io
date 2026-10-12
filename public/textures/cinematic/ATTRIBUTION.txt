@@ -1,0 +1,29 @@
+Engineering Connections — scrolling portfolio
+
+Earth surface: NASA Earth Observatory / Reto Stöckli, Blue Marble Next Generation.
+Source and derivatives: ../ATTRIBUTION.txt (parent texture folder).
+
+Moon color (2025 edition) and elevation: NASA's Scientific Visualization Studio.
+Visualizer: Ernie Wright (USRA); scientist: Noah Petro (NASA/GSFC).
+Source: https://svs.gsfc.nasa.gov/4720/
+Color: https://svs.gsfc.nasa.gov/vis/a000000/a004700/a004720/lroc_color_2k.jpg
+Height: https://svs.gsfc.nasa.gov/vis/a000000/a004700/a004720/ldem_3_8bit.jpg
+Local WebP derivatives: 2048x1024 color; 1024x512 height.
+
+Jupiter: NASA/JPL/Space Science Institute, Cassini cylindrical map PIA07782.
+Source: https://science.nasa.gov/photojournal/cassinis-best-maps-of-jupiter-cylindrical-map/
+Local derivative: 2048-pixel-wide WebP.
+
+Earth clouds: NASA Goddard Space Flight Center / Reto Stöckli, Blue Marble clouds.
+Image: https://eoimages.gsfc.nasa.gov/images/imagerecords/57000/57747/cloud_combined_2048.jpg
+Local derivative: 2048x1024 WebP.
+
+City, building geometry, signs, facade patterns, road texture, and Sun granulation:
+original code-authored illustrations for this portfolio. No purchased or third-party city assets.
+The city does not depict actual employer premises. Billboard words represent verified skills.
+Mercury and Mars use tinted lunar detail as an explicitly artistic stand-in at distant scale;
+they are not scientific planetary maps. Solar sizes, distances, and layout are illustrative.
+Satellite: original illustrative geometry; not operational hardware.
+
+Reproduce texture downloads/conversion: node scripts/fetch-cinematic-assets.mjs
+Fallback captures: generated from the actual Three.js scene, not AI image mockups.

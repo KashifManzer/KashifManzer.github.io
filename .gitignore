@@ -16,3 +16,5 @@ npm-debug.log*
 
 # internal agent planning
 docs/
+.claude/memory/
+test-results/

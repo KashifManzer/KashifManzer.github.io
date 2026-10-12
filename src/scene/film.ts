@@ -1,119 +1,219 @@
 import * as THREE from "three/webgpu";
-import { uv, length, smoothstep, color } from "three/tsl";
-import { damp, type Stage } from "./core";
-import type { ScrollState } from "./scroll";
-import { studioEnvironment } from "./env";
-import { createCrystal, EMBER } from "./crystal";
-import { createDust } from "./dust";
-import { createCity } from "./city";
-import { createPipeline } from "./post";
+import { cameraPosition, color, float, normalWorld, positionWorld, vec3 } from "three/tsl";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { createSatellite } from "./satellite";
+import { createSolar } from "./solar";
+import type { Stage } from "./core";
+import type { Scroll } from "./scroll";
 
-/**
- * The film. Scroll stop 0: the core in the void. Stop 1: the dive, the city appears as a
- * sketch. Stop 2: the city develops around the core.
- */
+export async function film(stage: Stage, scroll: Scroll, signal: AbortSignal) {
+  const { scene, camera, renderer, tier } = stage;
+  const response = await fetch(`/textures/earth-${tier === "high" ? 4096 : 2048}.webp`, { signal });
+  if (!response.ok) throw new Error(`Earth texture: ${response.status}`);
+  const bitmap = await createImageBitmap(await response.blob(), { imageOrientation: "flipY" });
+  if (signal.aborted) { bitmap.close(); throw signal.reason; }
+  const map = new THREE.Texture(bitmap);
+  map.addEventListener("dispose", () => bitmap.close());
+  map.colorSpace = THREE.SRGBColorSpace;
+  map.flipY = false;
+  map.needsUpdate = true;
+  map.anisotropy = Math.min(4, renderer.getMaxAnisotropy());
 
-const CITY_Y = -70;
-const ss = THREE.MathUtils.smoothstep;
+  const world = new THREE.Group();
+  world.position.set(0, -7, -3);
+  scene.add(world);
+  const sphere = new THREE.SphereGeometry(5.8, tier === "high" ? 96 : 48, tier === "high" ? 64 : 32);
+  const earth = new THREE.Mesh(sphere, new THREE.MeshStandardNodeMaterial({ map, roughness: 0.95, metalness: 0 }));
+  earth.rotation.set(0.12, 2.2, -0.2);
+  world.add(earth);
+  const solar = createSolar(stage, map);
+  const atmosphereMaterial = new THREE.MeshBasicNodeMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
+  const facing = normalWorld.dot(cameraPosition.sub(positionWorld).normalize()).clamp(0, 1);
+  const sunlight = normalWorld.dot(vec3(-0.5, 0.7, 0.5).normalize()).smoothstep(-0.3, 0.8);
+  atmosphereMaterial.colorNode = color("#529be3");
+  atmosphereMaterial.opacityNode = float(1).sub(facing).pow(3.8).mul(sunlight.mul(0.55).add(0.08));
+  const atmosphere = new THREE.Mesh(sphere, atmosphereMaterial);
+  atmosphere.scale.setScalar(1.012);
+  world.add(atmosphere);
 
-// Camera rig, sampled along a spline by scroll: u = stop / 2.
-const PATH = new THREE.CatmullRomCurve3([
-  new THREE.Vector3(0, 0.3, 7.5),
-  new THREE.Vector3(0.5, -9, 11),
-  new THREE.Vector3(0, -32, 30),
-  new THREE.Vector3(30, -30, 62),
-  new THREE.Vector3(52, -27, 72),
-]);
-const AIM = new THREE.CatmullRomCurve3([
-  new THREE.Vector3(-1.7, 0, 0),
-  new THREE.Vector3(0, -14, -2),
-  new THREE.Vector3(0, -66, -6),
-  new THREE.Vector3(0, -70, -4),
-  new THREE.Vector3(-8, -72, -6),
-]);
+  const sun = new THREE.DirectionalLight("#fff0d9", 3.2);
+  sun.position.set(-8, 12, 10);
+  scene.add(sun, new THREE.HemisphereLight("#a7c9ff", "#131a2b", 1.8));
+  const rim = new THREE.DirectionalLight("#83b6ed", 1.6);
+  rim.position.set(8, 1, -5);
+  scene.add(rim);
+  const satellite = createSatellite();
+  scene.add(satellite);
 
-export async function film(stage: Stage, scroll: ScrollState, progress: (p: number) => void) {
-  const { scene, camera, renderer, tier, reducedMotion } = stage;
-  scene.background = new THREE.Color("#030305");
-  scene.fog = new THREE.FogExp2("#05060a", 0.0105);
-  scene.environment = studioEnvironment(renderer);
-  progress(0.35);
-
-  const core = createCrystal(tier);
-  scene.add(core.group);
-
-  // A dim ember glow far behind the core: something for the glass to bend.
-  const glowMat = new THREE.MeshBasicNodeMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false });
-  glowMat.colorNode = color(EMBER).mul(smoothstep(0.5, 0.0, length(uv().sub(0.5))).pow(2.6)).mul(0.1);
-  const glow = new THREE.Mesh(new THREE.PlaneGeometry(15, 15), glowMat);
-  glow.position.set(1.5, -1, -12);
-  scene.add(glow);
-
-  const dust = createDust(renderer, tier === "high" ? 24000 : 8000);
-  scene.add(dust.sprite);
-
-  const city = createCity(tier);
-  city.group.position.y = CITY_Y;
-  scene.add(city.group);
-  progress(0.55);
-
-  const pipeline = createPipeline(renderer, scene, camera, tier);
-  stage.setRender(() => pipeline.render());
-
-  // Compile every material now, behind the loader, instead of hitching mid-scroll.
-  camera.position.copy(PATH.getPoint(0));
-  camera.lookAt(AIM.getPoint(0));
-  await renderer.compileAsync(scene, camera);
-  progress(0.9);
-
-  const camPos = PATH.getPoint(0);
-  const camAim = AIM.getPoint(0);
-  const tmp = new THREE.Vector3();
-  const travel = new THREE.Vector3(0, -1, 0);
-  const coreRest = new THREE.Vector3(0, 0.45, 0);
-  const coreCity = new THREE.Vector3(0, CITY_Y + 15, 0);
-  let spin = 0;
-  let u = 0;
-
-  stage.onFrame((dt, s) => {
-    const stop = Math.min(scroll.stop, 2);
-    const lambda = reducedMotion ? 60 : 2.6;
-    u = damp(u, stop / 2, lambda, dt);
-
-    // Camera along the rig, with a little parallax from the pointer.
-    PATH.getPoint(u, tmp);
-    tmp.x += s.pointer.x * 0.6 * (1 - u * 0.5);
-    tmp.y += s.pointer.y * 0.35;
-    camPos.copy(tmp);
-    AIM.getPoint(u, camAim);
-    // Portrait screens: centre the core above the name instead of beside it, then hand
-    // back to the shared path as the dive begins.
-    const k = camera.aspect < 0.8 ? Math.max(0, 1 - u * 2) : 0;
-    camPos.z += 4 * k;
-    camAim.x += 1.7 * k;
-    camAim.y -= 0.9 * k;
-    camera.position.copy(camPos);
-    camera.lookAt(camAim);
-    PATH.getTangent(Math.min(u + 0.02, 1), travel);
-
-    const t = u * 2; // back to stop units, smoothed
-    // The core leads the dive, then hangs over the city as its light source.
-    const dive = ss(t, 0.12, 1.05);
-    core.group.position.lerpVectors(coreRest, coreCity, dive);
-    core.group.scale.setScalar(THREE.MathUtils.lerp(1, 0.75, dive));
-    if (!reducedMotion) spin += dt * (0.22 + dive * 0.6);
-    core.shell.rotation.set(0.25 + s.pointer.y * 0.25, spin + s.pointer.x * 0.4, 0.1);
-    glow.position.y = -1 + core.group.position.y;
-    glow.lookAt(camera.position);
-
-    const rush = ss(t, 0.15, 0.55) * (1 - ss(t, 0.85, 1.35));
-    // Reduced motion: frozen clock, so traffic, window flips and dust twinkle hold still.
-    const time = reducedMotion ? 0 : s.time;
-    dust.step(reducedMotion ? 0 : dt, time, camera.position, rush, travel);
-    city.set(ss(t, 0.3, 1.1), ss(t, 1.0, 1.95), time);
-    // Nothing of the city shows before the sketch starts at t = 0.3; skip drawing it.
-    city.group.visible = t > 0.25;
+  const orbitPoint = (angle: number, radius = 8.7) => new THREE.Vector3(
+    Math.sin(angle) * radius, Math.cos(angle) * radius * 0.92, Math.cos(angle) * radius * 0.39,
+  );
+  const orbit = new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints(Array.from({ length: 181 }, (_, i) => orbitPoint(i / 180 * Math.PI * 2))),
+    new THREE.LineBasicMaterial({ color: "#74a6c2", transparent: true, opacity: 0.3 }),
+  );
+  world.add(orbit);
+  const connections = new THREE.Group();
+  world.add(connections);
+  const origin = orbitPoint(0.36);
+  const linkMaterial = new THREE.LineBasicMaterial({ color: "#81c8e4", transparent: true, opacity: 0.38 });
+  const pulseMaterial = new THREE.MeshBasicNodeMaterial({ color: "#bdeafa" });
+  const pulseGeometry = new THREE.SphereGeometry(0.045, 8, 6);
+  const links = [new THREE.Vector3(-3.7, 3.4, 2.9), new THREE.Vector3(1.2, 4.2, 3.8), new THREE.Vector3(4.3, 1.7, 3.5)].map((target) => {
+    target.normalize().multiplyScalar(5.83);
+    const midpoint = origin.clone().lerp(target, 0.5).normalize().multiplyScalar(8.2);
+    const curve = new THREE.QuadraticBezierCurve3(origin, midpoint, target);
+    const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(curve.getPoints(48)), linkMaterial);
+    line.frustumCulled = false; // Three short, moving links; avoid stale geometry bounds.
+    connections.add(line);
+    const station = new THREE.Mesh(pulseGeometry, pulseMaterial);
+    station.position.copy(target);
+    connections.add(station);
+    const pulse = new THREE.Mesh(pulseGeometry, pulseMaterial);
+    connections.add(pulse);
+    return { curve, line, pulse };
   });
 
-  progress(1);
+  // Deterministic, sparse stars; no per-frame allocations or particle simulation.
+  const stars = new Float32Array(240 * 3);
+  let seed = 23;
+  const random = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+  for (let i = 0; i < stars.length; i += 3) {
+    stars[i] = (random() - 0.5) * 100;
+    stars[i + 1] = (random() - 0.5) * 65;
+    stars[i + 2] = -45 - random() * 20;
+  }
+  const starfield = new THREE.Points(new THREE.BufferGeometry().setAttribute("position", new THREE.BufferAttribute(stars, 3)),
+    new THREE.PointsNodeMaterial({ color: "#abb9cd", size: 0.045, transparent: true, opacity: 0.5 }));
+  scene.add(starfield);
+
+  const controls = new OrbitControls(camera);
+  controls.enablePan = false;
+  controls.enableDamping = false;
+  controls.minPolarAngle = 0.2;
+  controls.maxPolarAngle = Math.PI - 0.2;
+  let inspecting = false;
+  let exploring = false;
+  let dirty = true;
+  controls.addEventListener("change", () => { dirty = true; });
+  let reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let time = 0;
+  let lastAspect = camera.aspect;
+  const aim = new THREE.Vector3();
+  const initialRotation = new THREE.Euler(0.15, -0.55, -0.28);
+  const satelliteRest = origin.clone().add(world.position);
+  const portraitRest = new THREE.Vector3(0.3, 1.5, 0).sub(world.position);
+  const orbitAxis = new THREE.Vector3(0, 0.39, -0.92).normalize();
+  const linkPoint = new THREE.Vector3();
+  function framePage() {
+    solar.update(time, 0, reduced);
+    const p = reduced ? 0 : THREE.MathUtils.smoothstep(scroll.state.progress, 0, 1);
+    const portrait = camera.aspect < 1;
+    // Illustrative speeds: satellite completes an orbit in four minutes; Earth in eight.
+    const angle = time * Math.PI * 2 / 240;
+    origin.set(Math.sin(0.36 + angle) * 8.7, Math.cos(0.36 + angle) * 8.7 * 0.92, Math.cos(0.36 + angle) * 8.7 * 0.39);
+    satelliteRest.copy(origin).add(world.position);
+    satellite.position.copy(satelliteRest);
+    satellite.rotation.copy(initialRotation);
+    satellite.scale.setScalar(0.56);
+    if (portrait) {
+      satellite.position.copy(portraitRest).applyAxisAngle(orbitAxis, angle).add(world.position).lerp(satelliteRest, p);
+      satellite.scale.setScalar(0.46 - p * 0.1);
+      camera.position.set(p * 1.5, 1 - p * 1.5, 18 + p * 7);
+      aim.set(p * 1.5, -1.6 - p * 2, 0);
+    } else {
+      camera.position.set(p * 1.8, 1 - p * 1.7, 14 + p * 10);
+      aim.set(0, -p * 3.3, -p);
+    }
+    camera.lookAt(aim);
+    earth.rotation.y = 2.2 + time * Math.PI * 2 / 480;
+    orbit.visible = p > 0.05;
+    connections.visible = p > 0.8;
+    orbit.material.opacity = p * 0.28;
+    linkMaterial.opacity = THREE.MathUtils.smoothstep(p, 0.8, 1) * 0.45;
+    if (connections.visible) {
+      // Keep every signal attached to the moving satellite, including the portrait transition.
+      linkPoint.copy(satellite.position).sub(world.position);
+      links.forEach(({ curve, line, pulse }, i) => {
+        curve.v0.copy(linkPoint);
+        curve.v1.copy(curve.v0).lerp(curve.v2, 0.5).normalize().multiplyScalar(8.2);
+        const positions = line.geometry.getAttribute("position");
+        for (let j = 0; j < positions.count; j++) {
+          curve.getPoint(j / (positions.count - 1), pulse.position);
+          positions.setXYZ(j, pulse.position.x, pulse.position.y, pulse.position.z);
+        }
+        positions.needsUpdate = true;
+        curve.getPoint((time * 0.11 + i / 3) % 1, pulse.position);
+      });
+    }
+  }
+  function resetInspection() {
+    const distance = Math.max(12, 14.5 / camera.aspect);
+    controls.minDistance = distance * 0.65;
+    controls.maxDistance = distance * 1.8;
+    camera.position.set(0, 1.3, distance);
+    controls.target.set(0, 0, 0);
+    controls.update();
+  }
+  framePage();
+  await renderer.compileAsync(scene, camera);
+  if (signal.aborted) throw signal.reason;
+  renderer.render(scene, camera);
+  stage.start((dt) => {
+    const resized = lastAspect !== camera.aspect;
+    if (exploring) {
+      if (!reduced) time += dt;
+      solar.update(time, dt, reduced);
+    } else if (inspecting) {
+      if (resized) resetInspection();
+    } else {
+      if (reduced && !dirty && !resized) return false;
+      if (!reduced) time += dt;
+      framePage();
+    }
+    const render = dirty || resized || (!reduced && !inspecting);
+    dirty = false;
+    lastAspect = camera.aspect;
+    return render;
+  });
+  return {
+    setReducedMotion(value: boolean) { reduced = value; dirty = true; if (!inspecting && !exploring) framePage(); },
+    explore(value: boolean) {
+      exploring = value;
+      dirty = true;
+      world.visible = satellite.visible = !value;
+      solar.activate(value, reduced);
+      if (!value) framePage();
+    },
+    travel(index: number) { solar.travel(index, reduced); dirty = true; },
+    pickPlanet(x: number, y: number) { return solar.pick(x, y); },
+    inspect(value: boolean) {
+      inspecting = value;
+      dirty = true;
+      world.visible = starfield.visible = !value;
+      solar.group.visible = !value;
+      if (value) {
+        satellite.position.set(0, 0, 0);
+        satellite.scale.setScalar(1);
+        satellite.rotation.set(-0.12, -0.25, -0.16);
+        controls.connect(renderer.domElement);
+        resetInspection();
+      } else { controls.disconnect(); framePage(); }
+      lastAspect = camera.aspect;
+    },
+    control(action: string) {
+      if (!inspecting) return;
+      if (action === "left") controls.rotateLeft(0.2);
+      if (action === "right") controls.rotateLeft(-0.2);
+      if (action === "up") controls.rotateUp(0.15);
+      if (action === "down") controls.rotateUp(-0.15);
+      if (action === "in") controls.dollyIn(0.85);
+      if (action === "out") controls.dollyOut(0.85);
+      if (action === "reset") resetInspection();
+    },
+    snap() { dirty = true; framePage(); },
+    dispose() { if (controls.domElement) controls.dispose(); },
+  };
 }
+
+export type Film = Awaited<ReturnType<typeof film>>;

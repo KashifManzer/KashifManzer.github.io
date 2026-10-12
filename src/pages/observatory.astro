@@ -1,0 +1,176 @@
+---
+import Base from "../layouts/Base.astro";
+import SolarExplorer from "../components/SolarExplorer.astro";
+---
+
+<Base
+  title="Space Observatory — Kashif Manzer"
+  description="An interactive space playground: explore eight planets and inspect an illustrative communications satellite."
+  noindex
+>
+  <div class="scene-home" aria-hidden="true">
+    <picture class="scene-poster">
+      <source media="(max-width: 900px)" srcset="/orbital-mobile.webp" />
+      <img src="/orbital-desktop.webp" alt="" width="1600" height="1000" fetchpriority="high" />
+    </picture>
+    <canvas class="stage"></canvas>
+  </div>
+  <a class="skip" href="#work">Skip to scene guide</a>
+  <header class="header">
+    <a class="wordmark" href="#top" aria-label="Kashif Manzer, back to top">Kashif Manzer<span aria-hidden="true">.</span></a>
+    <nav aria-label="Primary">
+      <button id="motion" type="button" aria-label="Reduce scene motion" aria-pressed="false" hidden>Motion on</button>
+      <a href="/#arrival">Back to journey <span aria-hidden="true">↗</span></a>
+    </nav>
+  </header>
+
+  <main id="top" tabindex="-1">
+    <section class="hero" aria-labelledby="intro-title">
+      <div class="hero-copy">
+
+        <h1 id="intro-title">Space<br />observatory<span class="period">.</span></h1>
+        <p class="intro">Take a closer look at Earth, inspect the satellite, or travel to another planet.</p>
+        <div class="hero-actions">
+          <a class="button primary" href="#work">Scene guide <span aria-hidden="true">↗</span></a>
+          <button class="button secondary" id="inspect" type="button" aria-haspopup="dialog" aria-controls="inspection" hidden>Inspect satellite <span aria-hidden="true">＋</span></button>
+        </div>
+        <button id="explore" class="explore-link" type="button" aria-haspopup="dialog" aria-controls="solar-system" hidden>Explore the solar system <span aria-hidden="true">↗</span></button>
+      </div>
+    </section>
+
+    <section class="connection" aria-labelledby="connection-title">
+      <div>
+        <h2 id="connection-title">Eight worlds.<br /><span>Take your time.</span></h2>
+        <p>Choose a destination in the solar system explorer. Drag to look around, or use the keyboard controls.</p>
+      </div>
+    </section>
+
+    <section class="work" id="work" tabindex="-1" aria-labelledby="work-title">
+      <div class="work-heading"><h2 id="work-title">About this scene.</h2></div>
+      <div class="work-body">
+        <p>This is an interactive illustration built with Three.js. Planet sizes, distances, and orbital speeds are arranged for exploration rather than scientific scale.</p>
+        <p>The communications satellite is an original model, not a real mission or live telemetry feed. Earth and Moon imagery comes from NASA sources listed in the scene credits.</p>
+        <p>Reduce motion for a still view. Rotation, zoom, and reset controls are available without dragging.</p>
+        <a class="button primary" href="/#work">See my engineering work <span aria-hidden="true">↗</span></a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Kashif Manzer <span>Backend &amp; Infrastructure</span></p>
+    <div class="footer-links"><a href="/textures/cinematic/ATTRIBUTION.txt">Scene credits</a><a href="#top">Back to top ↑</a></div>
+  </footer>
+
+  <dialog id="inspection" aria-labelledby="inspection-title" aria-describedby="inspection-description" data-lenis-prevent>
+    <div class="inspection-header">
+      <div><h2 id="inspection-title">A closer look.</h2><p id="inspection-description">An illustrative communications satellite. Drag to rotate; pinch or scroll to zoom.</p></div>
+      <button class="button close-inspection" type="button" autofocus>Close <span aria-hidden="true">×</span></button>
+    </div>
+    <div class="inspection-viewport" role="img" aria-label="Interactive 3D satellite with paired solar arrays, antenna dishes, and gold thermal insulation. Use the buttons below to change the view."></div>
+    <div class="inspection-controls" role="group" aria-label="Satellite view controls">
+      <button type="button" data-action="left" aria-label="Rotate satellite left">←</button>
+      <button type="button" data-action="right" aria-label="Rotate satellite right">→</button>
+      <button type="button" data-action="up" aria-label="Rotate satellite up">↑</button>
+      <button type="button" data-action="down" aria-label="Rotate satellite down">↓</button>
+      <button type="button" data-action="in" aria-label="Zoom in">＋</button>
+      <button type="button" data-action="out" aria-label="Zoom out">−</button>
+      <button type="button" data-action="reset">Reset view</button>
+    </div>
+  </dialog>
+  <SolarExplorer />
+</Base>
+
+<script>
+  // The readable page paints before the graphics bundle is fetched or compiled.
+  const start = () => { void import("../scene/experience").catch((error) => console.warn("[orbital]", error)); };
+  const afterPaint = () => requestAnimationFrame(() => requestAnimationFrame(start));
+  if (document.readyState === "complete") afterPaint();
+  else window.addEventListener("load", afterPaint, { once: true });
+</script>
+
+<style>
+  .scene-home { position: fixed; inset: 0; z-index: var(--z-stage); pointer-events: none; }
+  .scene-poster, .scene-poster img { display: block; width: 100%; height: 100%; }
+  .scene-poster img { object-fit: cover; }
+  :global(.stage) { position: absolute; inset: 0; width: 100%; height: 100%; display: block; opacity: 0; }
+  :global(.scene-ready .stage) { opacity: 1; }
+  :global(.scene-ready .scene-poster) { visibility: hidden; }
+  .header { position: absolute; inset: 0 0 auto; z-index: var(--z-hud); display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 28px var(--gutter); }
+  .wordmark { font-size: 17px; font-weight: 550; letter-spacing: -0.045em; text-decoration: none; white-space: nowrap; }
+  .wordmark span, .period { color: var(--accent); }
+  nav { display: flex; align-items: center; gap: clamp(18px, 3vw, 44px); font-size: 13px; }
+  nav a { text-decoration: none; }
+  nav a span { margin-left: 14px; color: var(--accent); }
+  nav button { padding: 10px 0; color: var(--ink-soft); font: 11px var(--font-mono); }
+  .skip { position: fixed; top: 12px; left: var(--gutter); z-index: var(--z-hud); padding: 14px 20px; background: var(--ink); color: var(--void); transform: translateY(-200%); }
+  .skip:focus-visible { transform: none; }
+  main, footer { position: relative; z-index: var(--z-content); }
+  section { padding-inline: var(--gutter); }
+  .hero { min-height: 100svh; display: flex; align-items: center; padding-block: 130px 90px; }
+  .hero-copy { width: min(620px, 55%); }
+  .eyebrow { margin: 0 0 28px; font: 11px/1.6 var(--font-mono); letter-spacing: 0.11em; text-transform: uppercase; color: var(--ink-soft); }
+  h1 { margin: 0; font-size: clamp(56px, 7vw, 96px); font-weight: 420; letter-spacing: -0.035em; line-height: 0.95; }
+  .intro { margin: 32px 0 28px; color: var(--ink-soft); font-size: clamp(15px, 1.3vw, 18px); line-height: 1.65; }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .explore-link { display: inline-flex; align-items: center; gap: 24px; margin-top: 20px; padding: 10px 0; min-height: 44px; font-size: 12px; color: var(--accent); }
+  .explore-link:hover { color: var(--ink); }
+  .button { min-height: 48px; display: inline-flex; align-items: center; justify-content: center; gap: 28px; padding: 14px 22px; border-radius: 4px; font-size: 13px; font-weight: 500; text-decoration: none; white-space: nowrap; }
+  .primary { background: var(--ink); color: var(--void); }
+  .primary:hover { background: var(--accent); }
+  .secondary, .close-inspection { border: 1px solid var(--edge); background: rgb(5 10 18 / 0.55); }
+  .secondary:hover, .close-inspection:hover { border-color: var(--accent); }
+  .button span { font-size: 18px; }
+  .connection { min-height: 50svh; display: grid; align-items: center; padding-block: 100px; background: linear-gradient(90deg, rgb(5 10 18 / 0.85), rgb(5 10 18 / 0.55) 45%, transparent 78%); }
+  .connection h2 { margin: 0; font-size: clamp(36px, 5.2vw, 80px); line-height: 1.07; letter-spacing: -0.035em; font-weight: 400; }
+  .connection h2 span { color: var(--ink-soft); }
+  .connection p { max-width: 30ch; margin-top: 24px; font-size: 16px; line-height: 1.7; color: var(--ink-soft); }
+  .work { min-height: 110svh; display: grid; grid-template-columns: 1fr 0.9fr; gap: 12%; align-items: start; padding-block: clamp(96px, 12vh, 160px); background: linear-gradient(90deg, rgb(5 10 18 / 0.72), rgb(5 10 18 / 0.94)); }
+  .work h2 { margin: 0; font-size: clamp(40px, 4.9vw, 76px); font-weight: 400; line-height: 1.07; letter-spacing: -0.035em; }
+  .work-body { max-width: 540px; }
+  .work-body > p:not(.scale):not(.work-summary) { font-size: 15px; color: var(--ink-soft); line-height: 1.8; }
+  dt { font: 11px/1.7 var(--font-mono); color: var(--ink-soft); }
+  dd { margin: 0; font-size: 13px; line-height: 1.6; }
+  footer { background: var(--void); padding: 32px var(--gutter); border-top: 1px solid var(--edge); display: flex; justify-content: space-between; gap: 28px; align-items: center; font-size: 12px; }
+  footer p { margin: 0; }
+  footer p span { display: block; color: var(--ink-soft); margin-top: 8px; font-size: 11px; }
+  .footer-links { display: flex; flex-wrap: wrap; gap: 28px; font-size: 10px; color: var(--ink-soft); }
+  #inspection { width: min(1200px, calc(100% - 48px)); height: min(850px, calc(100dvh - 48px)); max-width: none; max-height: none; padding: 0; border: 1px solid var(--edge); border-radius: 10px; background: var(--void); color: var(--ink); overflow: auto; }
+  #inspection[open] { display: flex; flex-direction: column; }
+  #inspection::backdrop { background: rgb(0 4 10 / 0.86); }
+  .inspection-header { display: flex; gap: 24px; justify-content: space-between; align-items: start; padding: 28px 32px 16px; }
+  .inspection-header h2 { margin: 0 0 8px; font-size: 28px; font-weight: 450; letter-spacing: -0.04em; }
+  .inspection-header p { margin: 0; max-width: 55ch; font-size: 13px; line-height: 1.6; color: var(--ink-soft); }
+  .inspection-viewport { position: relative; flex: 1; min-height: 180px; overflow: hidden; }
+  .inspection-controls { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; padding: 18px 20px 28px; }
+  .inspection-controls button { min-width: 44px; min-height: 44px; padding: 10px 14px; border: 1px solid var(--edge); border-radius: 4px; font-size: 16px; }
+  .inspection-controls button:last-child { font-size: 12px; }
+  .inspection-controls button:hover { background: var(--edge); }
+  @media (max-width: 900px) {
+    .header { padding-block: 22px; }
+    .wordmark { font-size: 15px; }
+    nav { gap: 16px; font-size: 11px; }
+    nav a span { display: none; }
+    nav button { font-size: 10px; }
+    .hero { align-items: end; min-height: max(790px, 100svh); padding-top: 340px; padding-bottom: 64px; background: linear-gradient(0deg, rgb(5 10 18 / 0.97), rgb(5 10 18 / 0.85) 48%, transparent 72%); }
+    .hero-copy { width: 100%; }
+    .eyebrow { font-size: 9px; margin-bottom: 22px; }
+    h1 { font-size: clamp(48px, 12vw, 80px); }
+    .intro { margin-top: 26px; font-size: 15px; }
+    .button { padding-inline: 16px; gap: 18px; font-size: 12px; }
+    .connection { min-height: 50svh; background: rgb(5 10 18 / 0.65); }
+    .connection h2 { font-size: clamp(34px, 7.5vw, 54px); }
+    .connection p { font-size: 14px; }
+    .work { grid-template-columns: 1fr; gap: 64px; padding-block: 80px; background: rgb(5 10 18 / 0.9); }
+    .work h2 { font-size: 48px; }
+    footer { align-items: start; flex-direction: column; }
+    .footer-links { gap: 20px; }
+    #inspection { width: calc(100% - 20px); height: calc(100dvh - 20px); }
+    .inspection-header { padding: 20px 18px; gap: 12px; }
+    .inspection-header h2 { font-size: 24px; }
+    .inspection-header p { font-size: 12px; }
+    .close-inspection { padding: 10px 12px; gap: 10px; }
+    .inspection-controls { gap: 6px; padding-inline: 12px; }
+  }
+  @media (max-width: 360px) { nav { gap: 10px; } .hero-actions { gap: 8px; } .button { gap: 10px; padding-inline: 12px; } }
+  .header a,.header button,.footer-links a { min-height:44px; display:inline-flex; align-items:center; }
+</style>

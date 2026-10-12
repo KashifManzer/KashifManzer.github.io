@@ -1,0 +1,8 @@
+Earth surface: NASA Earth Observatory, Blue Marble: Next Generation.
+Produced by Reto Stöckli. June 2004 monthly composite, base map.
+Source page: https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/base-map/
+Original: https://assets.science.nasa.gov/content/dam/science/esd/eo/images/bmng/bmng-base/june/world.200406.3x5400x2700.jpg
+Local derivatives: 4096x2048 and 2048x1024 WebP, resized from the original 5400x2700 JPEG.
+Credit required by source: NASA Earth Observatory.
+Satellite: original illustrative geometry authored for this portfolio. Not operational hardware or live telemetry.
+Orbital posters: captures of the same locally rendered Earth and satellite scene.

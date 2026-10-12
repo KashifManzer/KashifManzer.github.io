@@ -1,0 +1,88 @@
+---
+import { planets } from "../scene/planets";
+---
+<dialog id="solar-system" aria-labelledby="solar-title" aria-describedby="solar-description" data-lenis-prevent data-destination="overview">
+  <header class="solar-header">
+    <div><p class="solar-eyebrow">A little further from home</p><h2 id="solar-title">Beyond our orbit.</h2></div>
+    <button class="solar-close" type="button" autofocus>Return to Earth <span aria-hidden="true">↙</span></button>
+  </header>
+  <div class="solar-viewport">
+    <div class="planet-labels" role="group" aria-label="Planets in the scene">
+      {planets.map((planet, index) => <button type="button" data-planet-label={index} data-planet={index} aria-label={`Fly to ${planet.name}`} style={`--planet-color:${planet.color}`} hidden><span>{planet.name}</span></button>)}
+    </div>
+    <div class="planet-story" aria-live="polite" aria-atomic="true">
+      <p class="planet-kind">The solar system</p>
+      <h3 class="planet-name">Eight worlds.<br />One neighbourhood.</h3>
+      <p class="planet-description" id="solar-description">Choose a planet and take the long way home.</p>
+    </div>
+    <button class="solar-overview" type="button" hidden>← All planets</button>
+  </div>
+  <div class="solar-bottom">
+    <nav aria-label="Choose a planet">
+      {planets.map((planet, index) => <button type="button" data-planet={index} aria-pressed="false" style={`--planet-color:${planet.color}`}><span class="planet-dot" aria-hidden="true"></span>{planet.name}</button>)}
+    </nav>
+    <div class="solar-caption"><p>Illustrative worlds · sizes, distances &amp; speeds not to scale</p><button class="solar-motion" type="button">Pause motion</button><a href="https://science.nasa.gov/solar-system/planets/" target="_blank" rel="noreferrer">Discover the planets at NASA ↗</a></div>
+  </div>
+</dialog>
+
+<style>
+  #solar-system { width: 100%; height: 100dvh; max-width: none; max-height: none; padding: 0; border: 0; margin: 0; background: var(--void); color: var(--ink); overflow: auto; }
+  #solar-system[open] { display: flex; flex-direction: column; }
+  #solar-system::backdrop { background: #050a12; }
+  .solar-header { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 26px 4vw 18px; border-bottom: 1px solid var(--edge); }
+  .solar-eyebrow { color: var(--ink-soft); font: 10px var(--font-mono); letter-spacing: .13em; text-transform: uppercase; margin: 0 0 9px; }
+  h2 { font-size: 25px; font-weight: 450; letter-spacing: -.04em; margin: 0; }
+  .solar-close { font-size: 13px; min-height: 44px; padding: 10px 18px; border: 1px solid var(--edge); border-radius: 4px; white-space: nowrap; }
+  .solar-close span { color: var(--accent); margin-left: 24px; }
+  .solar-close:hover, .solar-overview:hover { border-color: var(--accent); }
+  .solar-viewport { position: relative; flex: 1; min-height: 340px; overflow: hidden; isolation: isolate; }
+  .planet-labels { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+  [data-planet-label] { position: absolute; top: 0; left: 0; padding: 0; pointer-events: auto; min-width: 44px; min-height: 44px; font: 11px var(--font-mono); }
+  [data-planet-label] span { display: block; padding: 8px 10px; margin-top: 15px; border-left: 1px solid var(--planet-color); background: rgb(5 10 18 / .85); }
+  [data-planet-label]:hover span { color: var(--planet-color); background: #111e2c; }
+  .planet-story { position: absolute; z-index: 1; left: 5%; top: 50%; transform: translateY(-50%); width: 32%; pointer-events: none; }
+  .solar-viewport::after { content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none; background: linear-gradient(90deg, rgb(5 10 18 / .7), transparent 50%); }
+  .planet-kind { margin: 0 0 16px; font: 11px var(--font-mono); color: var(--accent); text-transform: uppercase; letter-spacing: .1em; }
+  .planet-name { font-size: clamp(48px, 6.4vw, 96px); font-weight: 400; line-height: 1.04; letter-spacing: -.065em; margin: 0 0 20px; }
+  .planet-description { color: var(--ink-soft); max-width: 29ch; font-size: 15px; line-height: 1.7; margin: 0; }
+  [data-destination="overview"] .planet-story { top: 24px; transform: none; width: 300px; }
+  [data-destination="overview"] .planet-name { font-size: 30px; }
+  [data-destination="overview"] .planet-kind { display: none; }
+  [data-destination="overview"] .planet-description { font-size: 12px; }
+  .solar-overview { position: absolute; z-index: 2; left: 5%; top: 22px; min-height: 44px; padding: 10px 16px; border: 1px solid var(--edge); border-radius: 4px; font-size: 12px; background: rgb(5 10 18 / .8); }
+  .solar-bottom { padding: 0 4vw 18px; }
+  nav { display: grid; grid-template-columns: repeat(8, 1fr); border-block: 1px solid var(--edge); }
+  nav button { display: flex; justify-content: center; align-items: center; gap: 10px; min-height: 66px; font-size: 12px; border-bottom: 2px solid transparent; }
+  nav button:hover { background: rgb(160 190 220 / .06); }
+  nav button[aria-pressed="true"] { color: var(--planet-color); border-bottom-color: var(--planet-color); background: rgb(160 190 220 / .06); }
+  .planet-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--planet-color); box-shadow: inset -3px -1px 2px rgb(0 0 0 / .4); }
+  .solar-caption { display: flex; justify-content: space-between; align-items: center; gap: 15px; font: 10px/1.5 var(--font-mono); color: var(--ink-soft); padding-top: 14px; }
+  .solar-caption p { margin: 0; }
+  .solar-motion { min-height: 44px; padding: 8px; }
+  .solar-caption a { text-underline-offset: 4px; }
+  @media (max-width: 700px) {
+    .solar-header { padding: 18px 20px; gap: 12px; }
+    .solar-eyebrow { font-size: 8px; }
+    h2 { font-size: 21px; }
+    .solar-close { font-size: 11px; padding: 10px; }
+    .solar-close span { margin-left: 8px; }
+    .solar-viewport { min-height: 350px; }
+    .solar-viewport::after { background: linear-gradient(0deg, rgb(5 10 18 / .8), transparent 48%); }
+    .planet-story { left: 24px; top: auto; bottom: 12px; transform: none; width: calc(100% - 48px); }
+    .planet-name { font-size: 44px; margin-bottom: 10px; }
+    .planet-kind { margin-bottom: 8px; font-size: 9px; }
+    .planet-description { font-size: 12px; max-width: 36ch; }
+    [data-destination="overview"] .planet-story { top: 16px; bottom: auto; width: auto; }
+    [data-destination="overview"] .planet-name { font-size: 23px; margin-bottom: 8px; }
+    [data-destination="overview"] .planet-name br { display: none; }
+    [data-destination="overview"] .planet-description { display: none; }
+    [data-planet-label] { font-size: 9px; }
+    [data-planet-label] span { padding: 7px; }
+    .planet-labels { display: none; } /* The persistent planet menu provides uncrowded touch targets. */
+    nav { grid-template-columns: repeat(4, 1fr); }
+    nav button { min-height: 44px; font-size: 11px; gap: 7px; }
+    .solar-caption { flex-wrap: wrap; column-gap: 12px; row-gap: 0; font-size: 9px; padding-top: 8px; }
+    .solar-caption p { width: 100%; }
+    .solar-bottom { padding-bottom: 10px; }
+  }
+</style>

@@ -1,0 +1,23 @@
+Technology artwork — sources and SHA-256 hashes: /logos/SOURCES.json
+
+Original marks belong to their respective owners. They identify technologies
+used in Kashif Manzer's documented work; no endorsement is implied.
+The local SVG files preserve publisher artwork. The dimensional mounting,
+extrusion, lighting, architecture and inspection presentation are custom.
+Python's decorative semi-transparent ground shadow is not extruded.
+
+Go: https://go.dev/blog/go-brand (Go brand guidelines)
+Python: https://www.python.org/community/logos/ (Python Software Foundation)
+Apache Kafka: https://kafka.apache.org/community/trademark/ (Apache Software Foundation;
+  source SVG includes its Apache-2.0 license notice)
+Redis: https://redis.io/legal/redis-trademark-policy/ (Redis wordmark)
+Kubernetes / Prometheus: https://github.com/cncf/artwork (project artwork;
+  https://github.com/cncf/artwork/blob/main/LICENSE.md)
+Docker: https://www.docker.com/company/newsroom/media-resources/
+Grafana: https://github.com/grafana/grafana/blob/main/public/img/grafana_icon.svg
+  https://grafana.com/trademark-policy/
+Cloud Run: https://cloud.google.com/icons (2025 core product icon collection)
+
+No company headquarters or physical workplace is represented by the fictional districts.
+
+Social icons: Font Awesome Free, https://github.com/FortAwesome/Font-Awesome/tree/6.x/svgs/brands . Icons licensed CC BY 4.0; full license at /social/LICENSE.txt. Brand marks belong to their respective owners.

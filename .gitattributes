@@ -1,0 +1,2 @@
+# Preserve publisher artwork byte-for-byte; hashes are recorded in SOURCES.json.
+public/logos/*.svg -whitespace

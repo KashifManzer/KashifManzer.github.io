@@ -1,0 +1,56 @@
+[
+  {
+    "id": "go",
+    "source": "https://go.dev/blog/go-brand/Go-Logo/SVG/Go-Logo_Aqua.svg",
+    "archive_member": null,
+    "sha256": "fdd1ccff57ff04ac1ba487b00efeffe5d97d23406c563c95627ecf0f995fcc66"
+  },
+  {
+    "id": "python",
+    "source": "https://s3.dualstack.us-east-2.amazonaws.com/pythondotorg-assets/media/files/python-logo-only.svg",
+    "archive_member": null,
+    "sha256": "baec8662a1461c2cacc326b54d2727cb2f1ce07ba02d00f5b826d035104f649f"
+  },
+  {
+    "id": "kafka",
+    "source": "https://raw.githubusercontent.com/apache/kafka-site/asf-site/43/images/kafka-logo-readme-dark.svg",
+    "archive_member": null,
+    "sha256": "052cde7b9b0912323970099e5e5340f8777c619b8ffb2055e0d0f39751b6cc89"
+  },
+  {
+    "id": "redis",
+    "source": "https://redis.io/",
+    "archive_member": "inline SVG, viewBox=\"0 0 85 27\"",
+    "sha256": "f7a4f008a6df70f7b9bf92a4dbfd74c24d4f33f382a35e9aaa9b3144e73963cb"
+  },
+  {
+    "id": "kubernetes",
+    "source": "https://raw.githubusercontent.com/cncf/artwork/main/projects/kubernetes/icon/color/kubernetes-icon-color.svg",
+    "archive_member": null,
+    "sha256": "ff5427cfeeff39e82834ab1b4fe3ed61fc08596225a17eed56adc04f7cc1f712"
+  },
+  {
+    "id": "docker",
+    "source": "https://www.docker.com/static/Docker-Logos-1.zip",
+    "archive_member": "docker-logos/SVG/docker-mark-ocean-blue.svg",
+    "sha256": "0fd7f9164de13672bb1708ac7cc401ed439eb938ffa7358d5cb278e107904687"
+  },
+  {
+    "id": "prometheus",
+    "source": "https://raw.githubusercontent.com/cncf/artwork/main/projects/prometheus/icon/color/prometheus-icon-color.svg",
+    "archive_member": null,
+    "sha256": "a96d48cc7f1c91de940dacbf30581850fd2c0ed4afaf1b0b94fb86eb1d0aef6e"
+  },
+  {
+    "id": "grafana",
+    "source": "https://raw.githubusercontent.com/grafana/grafana/main/public/img/grafana_icon.svg",
+    "archive_member": null,
+    "sha256": "50806d5a65779e79f746398570e0fc322d5de55e19f0be87a275963f0947bb5e"
+  },
+  {
+    "id": "cloudrun",
+    "source": "https://services.google.com/fh/files/misc/core-products-icons.zip",
+    "archive_member": "Unique Icons/Cloud Run/SVG/CloudRun-512-color-rgb.svg",
+    "sha256": "42a910e5d9f5a8685227f91623bf50c8c9259c556a41eb9a97157fd1e78b0cea"
+  }
+]
