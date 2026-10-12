@@ -1,0 +1,12 @@
+Planet maps: Solar System Scope / INOVE, https://www.solarsystemscope.com/textures/
+License: Creative Commons Attribution 4.0 International, https://creativecommons.org/licenses/by/4.0/
+Mercury, Venus atmosphere, Mars, Saturn, Uranus, Neptune, Sun, Saturn ring and Earth specularity.
+The collection uses NASA imagery with artistic saturation and reconstructed unmapped regions.
+Local changes: WebP conversion, Earth specular inversion to roughness; illustrative lighting,
+scale, orbit spacing and rotation. These are illustrations, not scientific observations.
+Earth, Moon, clouds and Jupiter retain the NASA sources documented in ../cinematic/ATTRIBUTION.txt.
+
+Rock Boulder Dry: Poly Haven, https://polyhaven.com/a/rock_boulder_dry
+License: CC0, https://polyhaven.com/license
+Diffuse, OpenGL normal, roughness and AO maps converted to 1024px WebP.
+Source URLs: SOURCES.json. Reproduce: node scripts/fetch-realism-assets.mjs.

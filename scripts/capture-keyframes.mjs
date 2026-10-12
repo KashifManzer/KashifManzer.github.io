@@ -3,7 +3,7 @@ import { chromium } from 'playwright';
 import sharp from 'sharp';
 
 const origin = process.argv[2] ?? 'http://127.0.0.1:4323';
-const stops = [['opening',0], ['approach',4], ['arrival',7.3], ['descent',11], ['career',12.3], ['research',14.3], ['viasat',16.3]];
+const stops = [['opening',0], ['approach',4], ['arrival',7.3], ['descent',11], ['career',12.3], ['research',14.3], ['viasat',16.3], ['impact',20.5], ['contact',22]];
 await mkdir('public/direction', { recursive:true });
 await mkdir('test-results/journey', { recursive:true });
 const browser = await chromium.launch({ channel:'chrome', args:['--enable-unsafe-webgpu'] });
@@ -19,7 +19,7 @@ try {
     for (const [name,time] of stops) {
       await page.evaluate(({name,time})=>{
         const section=document.getElementById(name);
-        scrollTo(0,section.offsetTop+(time-Number(section.dataset.time))/Number(section.dataset.span)*section.offsetHeight);
+        scrollTo(0,(section.getBoundingClientRect().top+scrollY)+(name==='contact'?0:(time-Number(section.dataset.time))/Number(section.dataset.span)*section.offsetHeight));
       },{name,time});
       await page.waitForFunction(time=>Math.abs(Number(document.documentElement.dataset.progress)-time)<.002,time);
       await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));

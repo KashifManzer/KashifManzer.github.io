@@ -163,3 +163,12 @@ All brand icons are trademarks of their respective owners. The use of these
 trademarks does not indicate endorsement of the trademark holder by Font
 Awesome, nor vice versa. **Please do not use brand logos for any purpose except
 to represent the company, product, or service to which they refer.**
+
+Brand colors: LinkedIn blue #0A66C2 (https://brand.linkedin.com/); GitHub and X white.
+instagram-original.svg: Meta Inc. original May 2022 gradient glyph, archived at
+https://upload.wikimedia.org/wikipedia/commons/archive/2/21/20251228122811%21Instagram_Glyph_Gradient_RGB_logo.svg
+Source: https://www.facebook.com/brand/resources/instagram/instagram-brand/
+Provenance: https://commons.wikimedia.org/wiki/File:Instagram_Glyph_Gradient_RGB_logo.svg
+instagram-color.webp is a sampled color field from that artwork; no invented gradient stops.
+The dimensional mark uses the existing attributed Font Awesome outline. Brand trademarks
+belong to their owners. asteroid-*.webp are captures of this portfolio's rendered scene.

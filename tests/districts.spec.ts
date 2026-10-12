@@ -75,7 +75,7 @@ test('context loss during inspection restores compact readable content and relea
  await expect(page.locator('html')).toHaveAttribute('data-graphics','fallback');await expect(dialog(page)).not.toBeVisible();
  expect(await page.evaluate(()=>document.documentElement.classList.contains('logo-inspecting'))).toBe(false);
  if(await page.locator('.mobile-menu:not([open]) summary').isVisible()) await page.locator('.mobile-menu summary').click();
-  await page.getByRole('link',{name:'Selected work',exact:true}).click();await expect(page.locator('#work')).toBeInViewport();
+  await page.getByRole('link',{name:'Contact',exact:true}).click();await expect(page.locator('#contact')).toBeInViewport();
 });
 
 test('3D logo picking opens inspection but dragging does not',async({page})=>{
@@ -114,5 +114,5 @@ test('a slow optional logo times out without disabling the journey',async({page}
  await expect(page.locator('#career [data-technology="go"]')).toBeHidden();
  await page.locator('#career [data-technology="kafka"]').click();await expect(dialog(page)).toBeVisible();await close(page);
  if(await page.locator('.mobile-menu:not([open]) summary').isVisible()) await page.locator('.mobile-menu summary').click();
-  await page.getByRole('link',{name:'Selected work',exact:true}).click();await expect(page.locator('#work')).toBeInViewport();
+  await page.getByRole('link',{name:'Contact',exact:true}).click();await expect(page.locator('#contact')).toBeInViewport();
 });

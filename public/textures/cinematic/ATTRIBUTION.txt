@@ -18,12 +18,28 @@ Earth clouds: NASA Goddard Space Flight Center / Reto Stöckli, Blue Marble clou
 Image: https://eoimages.gsfc.nasa.gov/images/imagerecords/57000/57747/cloud_combined_2048.jpg
 Local derivative: 2048x1024 WebP.
 
-City, building geometry, signs, facade patterns, road texture, and Sun granulation:
+City, building geometry, signs, facade patterns, and road texture:
 original code-authored illustrations for this portfolio. No purchased or third-party city assets.
 The city does not depict actual employer premises. Billboard words represent verified skills.
-Mercury and Mars use tinted lunar detail as an explicitly artistic stand-in at distant scale;
-they are not scientific planetary maps. Solar sizes, distances, and layout are illustrative.
+Other planets, Sun, and Saturn ring: see ../realism/ATTRIBUTION.txt.
+Solar sizes, distances, and layout are illustrative.
 Satellite: original illustrative geometry; not operational hardware.
 
 Reproduce texture downloads/conversion: node scripts/fetch-cinematic-assets.mjs
 Fallback captures: generated from the actual Three.js scene, not AI image mockups.
+
+Additional planetary maps: Solar System Scope / INOVE.
+https://www.solarsystemscope.com/textures/
+Creative Commons Attribution 4.0 International:
+https://creativecommons.org/licenses/by/4.0/
+Mercury, Venus atmosphere, Mars, Saturn, Uranus, Neptune, Sun, Saturn rings,
+and Earth ocean specularity. Local WebP derivatives; Earth specularity inverted
+for roughness. The source collection includes artistic saturation and reconstructed
+unmapped regions. Lighting, sizes, distances, and speeds remain illustrative.
+
+Stone maps: Rock Boulder Dry by Poly Haven, CC0.
+https://polyhaven.com/a/rock_boulder_dry
+https://polyhaven.com/license
+Diffuse, OpenGL normal, roughness and ambient occlusion maps; local WebP derivatives.
+Exact source URLs and reproduction notes: /textures/realism/SOURCES.json.
+Social artwork and original Instagram gradient provenance: /social/LICENSE.txt.

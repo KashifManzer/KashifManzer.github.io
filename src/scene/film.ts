@@ -1,5 +1,5 @@
 import * as THREE from "three/webgpu";
-import { cameraPosition, color, float, normalWorld, positionWorld, vec3 } from "three/tsl";
+import { planetaryMaterials } from "./materials";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { createSatellite } from "./satellite";
 import { createSolar } from "./solar";
@@ -8,38 +8,26 @@ import type { Scroll } from "./scroll";
 
 export async function film(stage: Stage, scroll: Scroll, signal: AbortSignal) {
   const { scene, camera, renderer, tier } = stage;
-  const response = await fetch(`/textures/earth-${tier === "high" ? 4096 : 2048}.webp`, { signal });
-  if (!response.ok) throw new Error(`Earth texture: ${response.status}`);
-  const bitmap = await createImageBitmap(await response.blob(), { imageOrientation: "flipY" });
-  if (signal.aborted) { bitmap.close(); throw signal.reason; }
-  const map = new THREE.Texture(bitmap);
-  map.addEventListener("dispose", () => bitmap.close());
-  map.colorSpace = THREE.SRGBColorSpace;
-  map.flipY = false;
-  map.needsUpdate = true;
-  map.anisotropy = Math.min(4, renderer.getMaxAnisotropy());
-
+  const materials = await planetaryMaterials(tier, signal);
   const world = new THREE.Group();
   world.position.set(0, -7, -3);
   scene.add(world);
   const sphere = new THREE.SphereGeometry(5.8, tier === "high" ? 96 : 48, tier === "high" ? 64 : 32);
-  const earth = new THREE.Mesh(sphere, new THREE.MeshStandardNodeMaterial({ map, roughness: 0.95, metalness: 0 }));
+  const earth = new THREE.Mesh(sphere, materials.surface("earth"));
   earth.rotation.set(0.12, 2.2, -0.2);
   world.add(earth);
-  const solar = createSolar(stage, map);
-  const atmosphereMaterial = new THREE.MeshBasicNodeMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
-  const facing = normalWorld.dot(cameraPosition.sub(positionWorld).normalize()).clamp(0, 1);
-  const sunlight = normalWorld.dot(vec3(-0.5, 0.7, 0.5).normalize()).smoothstep(-0.3, 0.8);
-  atmosphereMaterial.colorNode = color("#529be3");
-  atmosphereMaterial.opacityNode = float(1).sub(facing).pow(3.8).mul(sunlight.mul(0.55).add(0.08));
+  const solar = createSolar(stage, materials);
+  const clouds = new THREE.Mesh(sphere, materials.clouds());
+  clouds.scale.setScalar(1.008); clouds.rotation.copy(earth.rotation); world.add(clouds);
+  const atmosphereMaterial = materials.atmosphere();
   const atmosphere = new THREE.Mesh(sphere, atmosphereMaterial);
   atmosphere.scale.setScalar(1.012);
   world.add(atmosphere);
 
   const sun = new THREE.DirectionalLight("#fff0d9", 3.2);
   sun.position.set(-8, 12, 10);
-  scene.add(sun, new THREE.HemisphereLight("#a7c9ff", "#131a2b", 1.8));
-  const rim = new THREE.DirectionalLight("#83b6ed", 1.6);
+  scene.add(sun, new THREE.HemisphereLight("#a7c9ff", "#060912", .45));
+  const rim = new THREE.DirectionalLight("#c7dcf0", .35);
   rim.position.set(8, 1, -5);
   scene.add(rim);
   const satellite = createSatellite();
@@ -127,6 +115,7 @@ export async function film(stage: Stage, scroll: Scroll, signal: AbortSignal) {
     }
     camera.lookAt(aim);
     earth.rotation.y = 2.2 + time * Math.PI * 2 / 480;
+    clouds.rotation.y = earth.rotation.y + .025 + time * .0008;
     orbit.visible = p > 0.05;
     connections.visible = p > 0.8;
     orbit.material.opacity = p * 0.28;

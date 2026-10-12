@@ -84,6 +84,10 @@ test('solar exploration fits mobile and landscape, traps focus, and survives con
     await page.screenshot({ path: `test-results/solar-overview-${width}.png` });
     await dialog.getByRole('button', { name: 'Saturn', exact: true }).click();
     await frame(page);
+    for (const control of await dialog.locator('.solar-close, .solar-overview, nav button, .solar-motion').all()) {
+      const box = (await control.boundingBox())!;
+      expect(box.y).toBeGreaterThanOrEqual(0); expect(box.y + box.height).toBeLessThanOrEqual(height);
+    }
     expect(await dialog.evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true);
     await page.screenshot({ path: `test-results/solar-saturn-${width}.png` });
     await dialog.getByRole('button', { name: 'Return to Earth', exact: false }).focus();

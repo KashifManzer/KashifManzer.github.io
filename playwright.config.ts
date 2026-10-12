@@ -14,9 +14,9 @@ export default defineConfig({
     trace: 'retain-on-failure',
   },
   projects: [
-    { name: 'chrome', testMatch: ['orbital.spec.ts', 'solar.spec.ts', 'keyframes.spec.ts', 'districts.spec.ts', 'launch.spec.ts'], use: { channel: 'chrome', launchOptions: { args: ['--enable-unsafe-webgpu', '--enable-unsafe-swiftshader'] } } },
-    { name: 'firefox', testMatch: ['compatibility.spec.ts', 'keyframes-compatibility.spec.ts', 'districts.spec.ts', 'launch.spec.ts'], use: { browserName: 'firefox' } },
-    { name: 'webkit', testMatch: ['compatibility.spec.ts', 'keyframes-compatibility.spec.ts', 'districts.spec.ts', 'launch.spec.ts'], use: { browserName: 'webkit' } },
+    { name: 'chrome', testMatch: ['orbital.spec.ts', 'solar.spec.ts', 'keyframes.spec.ts', 'districts.spec.ts', 'launch.spec.ts', 'asteroids.spec.ts'], use: { channel: 'chrome', launchOptions: { args: ['--enable-unsafe-webgpu', '--enable-unsafe-swiftshader'] } } },
+    { name: 'firefox', testMatch: ['solar.spec.ts', 'compatibility.spec.ts', 'keyframes-compatibility.spec.ts', 'districts.spec.ts', 'launch.spec.ts', 'asteroids.spec.ts'], use: { browserName: 'firefox' } },
+    { name: 'webkit', testMatch: ['solar.spec.ts', 'compatibility.spec.ts', 'keyframes-compatibility.spec.ts', 'districts.spec.ts', 'launch.spec.ts', 'asteroids.spec.ts'], use: { browserName: 'webkit' } },
   ],
   webServer: {
     command: 'npm run preview -- --host 127.0.0.1 --port 4322 --ignore-lock',

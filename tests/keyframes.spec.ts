@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 const view = { style:'header, main, .flight-hud, .status, .skip { visibility:hidden !important; }' };
-const stops = [['opening',0],['approach',4],['arrival',7.3],['descent',11],['career',12.3],['research',14.3],['viasat',16.3]] as const;
+const stops = [['opening',0],['approach',4],['arrival',7.3],['descent',11],['career',12.3],['research',14.3],['viasat',16.3],['impact',20.5]] as const;
 function errorsFrom(page:Page) {
   const errors:string[]=[];
   page.on('pageerror',error=>errors.push(error.message));
@@ -45,7 +45,7 @@ test('only opening copy is visible from the first graphics frame',async({page})=
       while(read().length<12) await new Promise(requestAnimationFrame);
       return read();
     });
-    for(const sample of samples) expect(sample).toEqual([1,0,0,0,0,0,0]);
+    for(const sample of samples) expect(sample).toEqual([1,0,0,0,0,0,0,0]);
   }
 });
 
@@ -101,9 +101,10 @@ test('native links skip the flight, restore focus, and survive deep linking and 
   await expect(page.locator('#career')).toBeFocused();
   await expect(page.locator('html')).toHaveAttribute('data-progress','12.0000');
   if(await page.locator('.mobile-menu:not([open]) summary').isVisible()) await page.locator('.mobile-menu summary').click();
-  await page.getByRole('link',{name:'Selected work',exact:true}).click();
-  await expect(page.locator('#work')).toBeFocused();
-  await expect(page.getByRole('heading',{name:'NetLink',exact:true})).toBeInViewport();
+  await page.getByRole('link',{name:'Contact',exact:true}).click();
+  await expect(page.locator('#contact')).toBeFocused();
+  await expect(page.getByRole('heading',{name:'Connect with Kashif',exact:true})).toHaveClass('sr-only');
+  await expect(page.locator('[data-social]')).toHaveCount(4);
   await page.goBack();
   await expect(page.locator('html')).toHaveAttribute('data-progress','12.0000');
   await page.reload();
@@ -119,6 +120,9 @@ test('all chapters fit desktop, narrow mobile, tablet, landscape, and zoom-equiv
   await ready(page);
   for(const [width,height] of [[1440,900],[768,1024],[390,844],[320,568],[844,390],[720,450]]) {
     await page.setViewportSize({width,height});
+    // setViewportSize resolves before the resize event in some engines. Let the
+    // preserved timeline settle before issuing an unrelated programmatic seek.
+    await page.evaluate(()=>new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve()))));
     for(const [name,time] of stops) {
       await seek(page,name,name==='descent'?9:time);
       expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
@@ -140,7 +144,13 @@ test('reduced motion shortens the journey and keeps graphics still, with an expl
   await page.waitForTimeout(300);
   expect((await page.screenshot(view)).equals(staticScene)).toBe(true);
   await page.getByRole('link',{name:'Experience',exact:true}).click();
-  expect((await page.screenshot(view)).equals(staticScene)).toBe(true);
+  await expect(page.locator('#career .chapter-poster')).toBeVisible();
+  await page.locator('#career .chapter-poster img').evaluate((img: HTMLImageElement) => img.decode());
+  await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
+  const careerScene = await page.screenshot(view);
+  expect(careerScene.equals(staticScene)).toBe(false);
+  await page.waitForTimeout(300);
+  expect((await page.screenshot(view)).equals(careerScene)).toBe(true);
   await page.locator('#reduce-motion').click();
   await expect(page.locator('#reduce-motion')).toHaveAttribute('aria-pressed','false');
   await expect(page.locator('html')).toHaveAttribute('data-progress','12.0000');
@@ -160,7 +170,7 @@ test('Earth and satellite animate slowly and a same-aspect resize redraws',async
   expect(actual.equals(await page.screenshot({style:view.style+'canvas{opacity:0!important}'}))).toBe(false);
 });
 
-test('mobile touch scroll drives the flight and direct project navigation stays available',async({browser})=>{
+test('mobile touch scroll drives the flight and direct contact navigation stays available',async({browser})=>{
   const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:3});
   const page=await context.newPage();
   await ready(page);
@@ -171,12 +181,18 @@ test('mobile touch scroll drives the flight and direct project navigation stays 
   await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
   await expect.poll(()=>page.evaluate(()=>scrollY)).toBeGreaterThan(250);
   if(await page.locator('.mobile-menu:not([open]) summary').isVisible()) await page.locator('.mobile-menu summary').click();
-  await page.getByRole('link',{name:'Selected work',exact:true}).tap();
-  await expect(page.locator('#work')).toBeFocused();
+  await page.getByRole('link',{name:'Contact',exact:true}).tap();
+  await expect(page.locator('#contact')).toBeFocused();
+  const asteroid = (await page.locator('a[data-social="linkedin"]').boundingBox())!;
+  const x = asteroid.x + asteroid.width / 2, y = asteroid.y + asteroid.height / 2;
+  await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});
+  for(const delta of [60,120,180,240]) await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x,y:y+delta}]});
+  await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+  await expect.poll(()=>page.locator('html').getAttribute('data-progress').then(Number)).toBeLessThan(22);
   await context.close();
 });
 
-test('without JavaScript every chapter, poster, and project remains accessible',async({browser})=>{
+test('without JavaScript every chapter, poster, and social link remains accessible',async({browser})=>{
   const context=await browser.newContext({javaScriptEnabled:false,viewport:{width:390,height:844}});
   const page=await context.newPage();
   await page.goto('/');
@@ -186,21 +202,21 @@ test('without JavaScript every chapter, poster, and project remains accessible',
     await expect.poll(()=>page.locator(`#${name} img`).evaluate((image:HTMLImageElement)=>image.complete&&image.naturalWidth>0)).toBe(true);
   }
   if(await page.locator('.mobile-menu:not([open]) summary').isVisible()) await page.locator('.mobile-menu summary').click();
-  await page.getByRole('link',{name:'Selected work',exact:true}).click();
-  await expect(page.locator('#work')).toBeInViewport();
+  await page.getByRole('link',{name:'Contact',exact:true}).click();
+  await expect(page.locator('#contact')).toBeInViewport();
   await expect(page.locator('#reduce-motion')).toBeHidden();
   await context.close();
 });
 
-test('each failed texture retains the illustrated portfolio and working project links',async({page})=>{
+test('each failed texture retains the illustrated portfolio and working contact links',async({page})=>{
   for(const asset of ['earth-*.webp','cinematic/moon-color.webp','cinematic/moon-height.webp','cinematic/jupiter.webp','cinematic/earth-clouds.webp']) {
     await page.route('**/textures/'+asset,route=>route.fulfill({status:503,body:'Unavailable'}));
     await page.goto('/#career');
     await expect(page.locator('html')).toHaveAttribute('data-graphics','fallback');
     await expect(page.locator('#career h2')).toBeInViewport();
     if(await page.locator('.mobile-menu:not([open]) summary').isVisible()) await page.locator('.mobile-menu summary').click();
-  await page.getByRole('link',{name:'Selected work',exact:true}).click();
-    await expect(page.locator('#work')).toBeFocused();
+  await page.getByRole('link',{name:'Contact',exact:true}).click();
+    await expect(page.locator('#contact')).toBeFocused();
     await page.unrouteAll();
   }
 });
@@ -242,8 +258,8 @@ test('unavailable graphics keeps the compact illustrated portfolio usable',async
   await expect(page.locator('html')).toHaveAttribute('data-graphics','fallback');
   await expect(page.locator('#opening .chapter-poster')).toBeVisible();
   if(await page.locator('.mobile-menu:not([open]) summary').isVisible()) await page.locator('.mobile-menu summary').click();
-  await page.getByRole('link',{name:'Selected work',exact:true}).click();
-  await expect(page.locator('#work')).toBeFocused();
+  await page.getByRole('link',{name:'Contact',exact:true}).click();
+  await expect(page.locator('#contact')).toBeFocused();
 });
 
 test('slow graphics time out without blocking the work or leaving a long empty flight',async({page})=>{
@@ -253,9 +269,9 @@ test('slow graphics time out without blocking the work or leaving a long empty f
   });
   await page.goto('/');
   if(await page.locator('.mobile-menu:not([open]) summary').isVisible()) await page.locator('.mobile-menu summary').click();
-  await page.getByRole('link',{name:'Selected work',exact:true}).click();
-  await expect(page.locator('#work')).toBeFocused();
+  await page.getByRole('link',{name:'Contact',exact:true}).click();
+  await expect(page.locator('#contact')).toBeFocused();
   await expect(page.locator('html')).toHaveAttribute('data-graphics','fallback',{timeout:25000});
-  await expect(page.locator('#work')).toBeInViewport();
+  await expect(page.locator('#contact')).toBeInViewport();
   expect(await page.locator('#opening').evaluate(element=>element.clientHeight)).toBe(900);
 });

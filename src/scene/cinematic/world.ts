@@ -1,68 +1,32 @@
 import * as THREE from "three/webgpu";
-import { cameraPosition, color, float, normalWorld, positionWorld, vec3 } from "three/tsl";
+import { planetaryMaterials } from "../materials";
 import { createSatellite } from "../satellite";
 import { createCity } from "./city";
+import { createSocialAsteroids } from "./social-asteroids";
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import type { TechnologyId } from './technologies';
 import type { Stage } from "../core";
 
 export async function createCinematicWorld(stage: Stage, signal: AbortSignal) {
   const { scene, camera, tier, renderer } = stage;
-  const loaded: THREE.Texture[] = [];
-  const texture = async (path: string, srgb = true) => {
-    const response = await fetch(path, { signal });
-    if (!response.ok) throw new Error(`${path}: HTTP ${response.status}`);
-    const bitmap = await createImageBitmap(await response.blob(), { imageOrientation: "flipY" });
-    if (signal.aborted) { bitmap.close(); throw signal.reason; }
-    const map = new THREE.Texture(bitmap);
-    map.addEventListener("dispose", () => bitmap.close());
-    map.flipY = false; map.needsUpdate = true;
-    if (srgb) map.colorSpace = THREE.SRGBColorSpace;
-    loaded.push(map);
-    return map;
-  };
-  // Settle every request before cleanup so a late decode cannot leak after a sibling fails.
-  const results = await Promise.allSettled([
-    texture(`/textures/earth-${tier === "high" ? 4096 : 2048}.webp`),
-    texture("/textures/cinematic/moon-color.webp"),
-    texture("/textures/cinematic/moon-height.webp", false),
-    texture("/textures/cinematic/jupiter.webp"),
-    texture("/textures/cinematic/earth-clouds.webp", false),
-  ]);
-  const failed = results.find(result => result.status === "rejected");
-  if (failed || signal.aborted) { loaded.forEach(map => map.dispose()); throw failed?.reason ?? signal.reason; }
-  const [earthMap, moonMap, moonHeight, jupiterMap, cloudsMap] = results.map(result => (result as PromiseFulfilledResult<THREE.Texture>).value);
+  const materials = await planetaryMaterials(tier, signal);
 
   const space = new THREE.Group();
   scene.add(space);
   const sphere = new THREE.SphereGeometry(1, tier === "high" ? 96 : 48, tier === "high" ? 64 : 32);
   const earthSystem = new THREE.Group(); earthSystem.position.set(0, -7, 0); space.add(earthSystem);
-  const earth = new THREE.Mesh(sphere, new THREE.MeshStandardNodeMaterial({ map: earthMap, roughness: 0.68, metalness: 0.03 }));
+  const earth = new THREE.Mesh(sphere, materials.surface("earth"));
   earth.scale.setScalar(6); earth.rotation.set(0.12, 2.1, -0.18); earthSystem.add(earth);
-  const clouds = new THREE.Mesh(sphere, new THREE.MeshStandardNodeMaterial({ color: "#ffffff", alphaMap: cloudsMap, transparent: true, opacity: 0.12, depthWrite: false, roughness: 1 }));
-  clouds.scale.setScalar(6.035); clouds.rotation.copy(earth.rotation); clouds.rotation.y += 0.035; earthSystem.add(clouds);
-  const atmosphereMaterial = new THREE.MeshBasicNodeMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
-  const facing = normalWorld.dot(cameraPosition.sub(positionWorld).normalize()).clamp(0, 1);
-  const lit = normalWorld.dot(vec3(-0.6, 0.4, 0.7).normalize()).smoothstep(-0.25, 0.6);
-  atmosphereMaterial.colorNode = color("#409fee");
-  atmosphereMaterial.opacityNode = float(1).sub(facing).pow(4.2).mul(lit.mul(0.8).add(0.025));
+  const clouds = new THREE.Mesh(sphere, materials.clouds());
+  clouds.scale.setScalar(6.05); clouds.rotation.copy(earth.rotation); clouds.rotation.y += 0.035; earthSystem.add(clouds);
+  const atmosphereMaterial = materials.atmosphere();
   const atmosphere = new THREE.Mesh(sphere, atmosphereMaterial); atmosphere.scale.setScalar(6.09); earthSystem.add(atmosphere);
-  const moon = new THREE.Mesh(sphere, new THREE.MeshStandardNodeMaterial({ map: moonMap, bumpMap: moonHeight, bumpScale: 0.035, roughness: 1 }));
+  const moon = new THREE.Mesh(sphere, materials.surface("moon"));
   moon.scale.setScalar(1.63); moon.position.set(-10, 6, -19); moon.rotation.y = 2.4; space.add(moon);
   const satellite = createSatellite(); satellite.position.set(4, 1.3, 3.5); satellite.scale.setScalar(0.64); satellite.rotation.set(0.15, -0.55, -0.28); space.add(satellite);
 
   const solar = new THREE.Group(); space.add(solar);
-  const sunCanvas = document.createElement("canvas"); sunCanvas.width = 512; sunCanvas.height = 256;
-  const sunContext = sunCanvas.getContext("2d")!;
-  const granules = sunContext.createImageData(512, 256);
-  for (let i = 0; i < 512 * 256; i++) {
-    const x = i % 512, y = Math.floor(i / 512);
-    const detail = (Math.sin(x * 1.7 + y * 2.3) + Math.sin(x * 0.14 - y * 0.19)) * 0.5;
-    granules.data.set([255, 150 + detail * 35, 54 + detail * 16, 255], i * 4);
-  }
-  sunContext.putImageData(granules, 0, 0);
-  const sunMap = new THREE.CanvasTexture(sunCanvas); sunMap.colorSpace = THREE.SRGBColorSpace;
-  const sun = new THREE.Mesh(sphere, new THREE.MeshBasicNodeMaterial({ map: sunMap, color: new THREE.Color(1.5, 1.5, 1.5) }));
+  const sun = new THREE.Mesh(sphere, materials.sun());
   sun.scale.setScalar(15); sun.position.set(-50, -5, -65); solar.add(sun);
   const glowCanvas = document.createElement("canvas"); glowCanvas.width = glowCanvas.height = 256;
   const context = glowCanvas.getContext("2d")!;
@@ -71,28 +35,20 @@ export async function createCinematicWorld(stage: Stage, signal: AbortSignal) {
   context.fillStyle = glow; context.fillRect(0, 0, 256, 256);
   const halo = new THREE.Sprite(new THREE.SpriteNodeMaterial({ map: new THREE.CanvasTexture(glowCanvas), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
   halo.scale.set(80, 80, 1); halo.position.copy(sun.position); solar.add(halo);
-  const bodies: [number, number, number, number, string, THREE.Texture?][] = [
-    [-47, -5, -42, 0.85, "#938c83", moonMap],
-    [-25, -5, -25, 1.75, "#d4bb8d"],
-    [50, -5, -15, 1.1, "#b57552", moonMap],
-    [75, -5, -157, 9, "#ffffff", jupiterMap],
-    [-228, -5, 36, 8, "#c7b995"],
-    [105, -5, 131, 4.7, "#92c5cf"],
-    [-264, -5, -260, 4.65, "#345caa"],
+  const bodies: [number, number, number, number, string][] = [
+    [-47, -5, -42, .85, 'mercury'], [-25, -5, -25, 1.75, 'venus'],
+    [50, -5, -15, 1.1, 'mars'], [75, -5, -157, 9, 'jupiter'],
+    [-228, -5, 36, 8, 'saturn'], [105, -5, 131, 4.7, 'uranus'], [-264, -5, -260, 4.65, 'neptune'],
   ];
   const planets: { body: THREE.Mesh; radius: number; angle: number }[] = [];
-  bodies.forEach(([x, y, z, radius, tint, map], index) => {
-    const body = new THREE.Mesh(sphere, new THREE.MeshStandardNodeMaterial({ color: tint, map: map ?? null, roughness: 1 }));
+  bodies.forEach(([x, y, z, radius, name], index) => {
+    const body = new THREE.Mesh(sphere, materials.surface(name));
     body.position.set(x, y, z); body.scale.setScalar(radius); body.rotation.y = 0.7;
     solar.add(body);
     planets.push({ body, radius: Math.hypot(x + 50, z + 65), angle: Math.atan2(z + 65, x + 50) });
     if (index === 4) {
       const ring = new THREE.Group(); ring.rotation.set(-1.1, 0.3, -0.2);
-      for (let i = 0; i < 24; i++) {
-        const inner = 1.34 + i * 0.04;
-        const material = new THREE.MeshStandardNodeMaterial({ color: i % 3 ? "#b7a68b" : "#d5c8ad", side: THREE.DoubleSide, transparent: true, opacity: i === 15 ? 0.06 : 0.45 + i % 4 * 0.1, depthWrite: false });
-        const band = new THREE.Mesh(new THREE.RingGeometry(inner, inner + 0.036, 96), material); band.renderOrder = 1; ring.add(band);
-      }
+      ring.add(materials.ring());
       body.add(ring);
     }
   });
@@ -124,6 +80,7 @@ export async function createCinematicWorld(stage: Stage, signal: AbortSignal) {
   space.add(new THREE.HemisphereLight("#799ac8", "#02030b", 0.7));
 
   const { group: city, animate: animateCity, library, sculptures } = await createCity(tier === "low", signal); scene.add(city);
+  const asteroids = await createSocialAsteroids(tier === "low", signal, scene);
   const room = new RoomEnvironment();
   const generator = new THREE.PMREMGenerator(stage.renderer);
   const environment = generator.fromScene(room, 0.04);
@@ -149,7 +106,7 @@ export async function createCinematicWorld(stage: Stage, signal: AbortSignal) {
     if (moving) elapsed += dt;
     const portrait = camera.aspect < 1;
     const urban = progress >= 10.15;
-    space.visible = !urban; city.visible = urban;
+    space.visible = !urban; city.visible = urban && progress < 19.4;
     const fade = 1 - THREE.MathUtils.smoothstep(progress, 2, 3.4);
     solar.visible = fade > 0;
     fadingMaterials.forEach((opacity, material) => { material.opacity = opacity * fade; });
@@ -178,6 +135,8 @@ export async function createCinematicWorld(stage: Stage, signal: AbortSignal) {
       [15.5, [0, 17, -168], [20, 15, -243]],
       [16, [portrait ? 12 : -9, portrait ? 10 : 8, portrait ? -175 : -187], [portrait ? 20 : 4, portrait ? 0 : 13, -258]],
       [18, [portrait ? 12 : -9, portrait ? 10 : 8, portrait ? -175 : -187], [portrait ? 20 : 4, portrait ? 0 : 13, -258]],
+      [19.4, [0, portrait ? 32 : 15, portrait ? -400 : -425], [0, 0, -460]],
+      [22, [0, portrait ? 32 : 15, portrait ? -400 : -425], [0, 0, -460]],
       ];
       spaceStops = [
       [0, [160, portrait ? 650 : 250, portrait ? 1450 : 590], [-50, portrait ? -100 : -45, -65]],
@@ -194,13 +153,16 @@ export async function createCinematicWorld(stage: Stage, signal: AbortSignal) {
     const a = progress >= stops.at(-1)![0] ? stops.at(-1)! : stops[index];
     const b = stops[Math.min(stops.indexOf(a) + 1, stops.length - 1)];
     let t = THREE.MathUtils.clamp((progress - a[0]) / Math.max(0.001, b[0] - a[0]), 0, 1);
-    t = t * t * (3 - 2 * t);
+    t = t * t * t * (t * (t * 6 - 15) + 10);
     target.fromArray(a[2]).lerp(to.fromArray(b[2]), t);
     from.fromArray(a[1]).sub(position.fromArray(a[2]));
     to.fromArray(b[1]).sub(position.fromArray(b[2]));
     const distance = Math.exp(THREE.MathUtils.lerp(Math.log(from.length()), Math.log(to.length()), t));
     position.copy(from.normalize()).lerp(to.normalize(), t).normalize().multiplyScalar(distance).add(target);
     camera.position.copy(position); camera.lookAt(target);
+    camera.updateProjectionMatrix();
+    camera.updateMatrixWorld();
+    asteroids.update(progress, elapsed, camera);
     starfield.position.copy(camera.position);
     for (const planet of planets) {
       const angle = planet.angle + elapsed * 0.0003 * 155 / planet.radius;
@@ -219,19 +181,19 @@ export async function createCinematicWorld(stage: Stage, signal: AbortSignal) {
     return Math.max(0, 1 - Math.abs(progress - 10.15) / 0.85);
   }
   return {
-    travel, sculptures, city, available: [...library.keys()],
+    travel, sculptures, city, highlightSocial: asteroids.highlight, socialTargets: asteroids.targets, available: [...library.keys()],
     inspect(id: TechnologyId | null) {
       if (inspected) { studio.remove(inspected); inspected = undefined; }
       studio.visible = !!id;
       if (!id) return;
       const source = library.get(id); if (!source) return;
       inspected = source.clone(true); studio.add(inspected);
-      space.visible = city.visible = false;
+      space.visible = city.visible = asteroids.group.visible = false;
       scene.background = new THREE.Color('#101c29'); scene.fog = null;
       scene.environment = environment.texture; scene.environmentIntensity = 0.35;
       camera.fov = 36; camera.near = 0.05; camera.updateProjectionMatrix();
       camera.position.set(0.55, 0.2, camera.aspect < 1 ? 3.4 : 2.1); camera.lookAt(0, 0, 0);
     },
-    dispose() { environment.dispose(); },
+    dispose() { environment.dispose(); asteroids.dispose(); },
   };
 }

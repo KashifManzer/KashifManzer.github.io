@@ -5,7 +5,7 @@ import type { createCinematicWorld } from './world';
 import { technologies, type TechnologyId } from './technologies';
 
 type World = Awaited<ReturnType<typeof createCinematicWorld>>;
-export function createLogoInspection(stage:Stage, world:World, invalidate:()=>void) {
+export function createLogoInspection(stage:Stage, world:World, invalidate:()=>void, onOpenChange:(open:boolean)=>void = () => {}) {
   const root=document.documentElement;
   const canvas=stage.renderer.domElement;
   const home=canvas.parentElement!;
@@ -19,18 +19,24 @@ export function createLogoInspection(stage:Stage, world:World, invalidate:()=>vo
   controls.minPolarAngle=.15;controls.maxPolarAngle=Math.PI-.15;
   controls.addEventListener('change',invalidate);
   let origin:HTMLElement|undefined, savedScroll=0, savedNear=.1;
+  let savedChapter:HTMLElement|null=null, savedLocal=0;
   let pointerStart:{x:number;y:number;scroll:number}|undefined;
   const ray=new THREE.Raycaster();const pointer=new THREE.Vector2();
   function close() {
     if(!dialog.open)return;
     controls.disconnect();dialog.close();home.prepend(canvas);root.classList.remove('logo-inspecting');
-    stage.camera.near=savedNear;world.inspect(null);stage.resize();scrollTo({top:savedScroll,behavior:'instant'});
-    origin?.focus({preventScroll:true});invalidate();
+    stage.camera.near=savedNear;world.inspect(null);stage.resize();
+    const restore = savedChapter ? savedChapter.offsetTop + savedLocal * savedChapter.offsetHeight : savedScroll;
+    scrollTo({top:restore,behavior:'instant'});
+    origin?.focus({preventScroll:true});onOpenChange(false);invalidate();
   }
   function open(id:TechnologyId,trigger:HTMLElement) {
     if(dialog.open||!world.available.includes(id))return;
     if (!trigger.matches('button,a')) trigger.tabIndex = -1;
     origin=trigger;savedScroll=scrollY;savedNear=stage.camera.near;
+    savedChapter=document.querySelector<HTMLElement>(`.chapter[id="${root.dataset.chapter}"]`);
+    savedLocal=savedChapter?(savedScroll-savedChapter.offsetTop)/savedChapter.offsetHeight:0;
+    onOpenChange(true);
     dialog.querySelector('#logo-title')!.textContent=technologies[id].name;
     dialog.querySelector('#logo-description')!.textContent=technologies[id].use;
     dialog.dataset.technology=id;

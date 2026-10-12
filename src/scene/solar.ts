@@ -1,49 +1,16 @@
 import * as THREE from "three/webgpu";
 import { planets } from "./planets";
+import type { PlanetaryMaterials } from "./materials";
 import type { Stage } from "./core";
 
-/** Original procedural illustrations, not photographic planetary maps. */
-function surface(index: number) {
-  const canvas = document.createElement("canvas");
-  canvas.width = 512; canvas.height = 256;
-  const context = canvas.getContext("2d")!;
-  const pixels = context.createImageData(canvas.width, canvas.height);
-  const tint = new THREE.Color(planets[index].color).convertLinearToSRGB();
-  let seed = index + 41;
-  const random = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
-  for (let y = 0; y < canvas.height; y++) for (let x = 0; x < canvas.width; x++) {
-    const u = x / canvas.width * Math.PI * 2, v = y / canvas.height * Math.PI;
-    const turbulence = Math.sin(u * 7 + Math.sin(v * 19)) * 0.35 + Math.cos(u * 13 + v * 9) * 0.2;
-    const bands = Math.sin(v * 34 + turbulence) * 0.08 + Math.sin(v * 79 + turbulence * 2) * 0.04 + Math.sin(v * 153 + Math.cos(u * 17)) * 0.018;
-    const rock = Math.sin(u * 13 + Math.sin(v * 17) * 2) * Math.sin(v * 23 + Math.cos(u * 9)) * 0.18;
-    const shade = index >= 4 ? 0.78 + bands * (index >= 6 ? 0.3 : 1) : 0.72 + rock + (random() - 0.5) * 0.1;
-    const offset = (y * canvas.width + x) * 4;
-    pixels.data[offset] = tint.r * shade * 255;
-    pixels.data[offset + 1] = tint.g * shade * 255;
-    pixels.data[offset + 2] = tint.b * shade * 255;
-    pixels.data[offset + 3] = 255;
-  }
-  context.putImageData(pixels, 0, 0);
-  if (index === 0 || index === 3) {
-    for (let i = 0; i < 95; i++) {
-      const x = random() * 512, y = random() * 256, r = 1 + random() * 7;
-      context.beginPath(); context.arc(x, y, r, 0, Math.PI * 2);
-      context.fillStyle = "rgba(24, 14, 12, .14)"; context.fill();
-      context.strokeStyle = "rgba(255, 233, 208, .12)"; context.stroke();
-    }
-  }
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  return texture;
-}
-
-export function createSolar(stage: Stage, earthMap: THREE.Texture) {
+export function createSolar(stage: Stage, materials: PlanetaryMaterials) {
   const { scene, camera } = stage;
   const group = new THREE.Group();
   group.position.set(32, 17, -105);
   scene.add(group);
   const geometry = new THREE.SphereGeometry(1, stage.tier === "high" ? 64 : 32, 32);
-  const sun = new THREE.Mesh(geometry, new THREE.MeshBasicNodeMaterial({ color: "#ffd493", transparent: true, depthWrite: false }));
+  const sun = new THREE.Mesh(geometry, materials.sun());
+  sun.material.transparent = true; sun.material.depthWrite = false;
   sun.scale.setScalar(4);
   group.add(sun);
   const glowCanvas = document.createElement("canvas");
@@ -59,7 +26,8 @@ export function createSolar(stage: Stage, earthMap: THREE.Texture) {
   group.add(halo);
   const orbitMaterial = new THREE.LineBasicMaterial({ color: "#678297", transparent: true, depthWrite: false, opacity: 0.2 });
   const bodies = planets.map((planet, index) => {
-    const body = new THREE.Mesh(geometry, new THREE.MeshStandardNodeMaterial({ map: index === 2 ? earthMap : surface(index), roughness: 1, transparent: true }));
+    const body = new THREE.Mesh(geometry, materials.surface(planet.name));
+    body.material.transparent = true;
     body.scale.setScalar(planet.radius);
     body.userData.planet = index;
     group.add(body);
@@ -70,21 +38,14 @@ export function createSolar(stage: Stage, earthMap: THREE.Texture) {
     group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), orbitMaterial));
     return body;
   });
+  const earthClouds = new THREE.Mesh(geometry, materials.clouds());
+  earthClouds.scale.setScalar(1.008); bodies[2].add(earthClouds);
+  const earthAir = new THREE.Mesh(geometry, materials.atmosphere());
+  earthAir.scale.setScalar(1.015); bodies[2].add(earthAir);
   const rings = new THREE.Group();
   rings.rotation.x = -1.12; rings.rotation.y = -0.2;
-  const ringCanvas = document.createElement("canvas");
-  ringCanvas.width = ringCanvas.height = 512;
-  const ringContext = ringCanvas.getContext("2d")!;
-  for (let r = 139; r < 256; r++) {
-    const gap = r > 223 && r < 230;
-    ringContext.strokeStyle = `rgba(210, 194, 158, ${gap ? 0.04 : 0.35 + Math.sin(r * 1.7) * 0.12 + Math.sin(r * 0.15) * 0.2})`;
-    ringContext.beginPath(); ringContext.arc(256, 256, r, 0, Math.PI * 2); ringContext.stroke();
-  }
-  const ringMap = new THREE.CanvasTexture(ringCanvas);
-  ringMap.colorSpace = THREE.SRGBColorSpace;
-  const ringMaterial = new THREE.MeshStandardNodeMaterial({ map: ringMap, side: THREE.DoubleSide, transparent: true, depthWrite: false, roughness: 1 });
-  const ringMesh = new THREE.Mesh(new THREE.RingGeometry(1.3, 2.4, 128), ringMaterial);
-  ringMesh.renderOrder = 1;
+  const ringMesh = materials.ring();
+  const ringMaterial = ringMesh.material;
   rings.add(ringMesh);
   // Rings inherit Saturn's radius but remain tilted as the planet spins.
   bodies[5].add(rings);
@@ -133,6 +94,8 @@ export function createSolar(stage: Stage, earthMap: THREE.Texture) {
       sun.material.opacity = halo.material.opacity = backgroundOpacity;
       orbitMaterial.opacity = focus ? 0.025 : 0.2;
       ringMaterial.opacity = focus && selected !== 5 ? 0.06 : 1;
+      earthClouds.visible = earthAir.visible = !focus || selected === 2;
+      earthClouds.rotation.y = .025 + time * .0008;
       bodies.forEach((body, i) => {
         const planet = planets[i];
         const angle = planet.phase + time * 0.045 / (1 + i * 0.65);

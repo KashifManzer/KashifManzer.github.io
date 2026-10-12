@@ -40,5 +40,5 @@ try {
   await video.saveAs('test-results/journey/scroll-walkthrough.webm');
   await writeFile('test-results/journey/scroll-report.json',JSON.stringify({visited,errors},null,2));
   console.log(JSON.stringify({first:visited[0],last:visited.at(-1),errors}));
-  if(errors.length||visited.at(-1)<18)throw new Error('Scroll walkthrough did not complete cleanly');
+  if(errors.length||visited.at(-1)<22)throw new Error('Scroll walkthrough did not complete cleanly');
 }finally{await browser.close();}

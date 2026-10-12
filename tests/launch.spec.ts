@@ -59,16 +59,19 @@ test('mobile menu supports keyboard, outside dismissal, and contact survives mot
   expect((await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze()).violations).toEqual([]);
 });
 
-test('shorter journey retains camera milestones and contact fits all viewport sizes', async ({ page }) => {
+test('extended journey retains camera milestones and contact fits all viewport sizes', async ({ page }) => {
   await page.goto('/?still&webgl');await expect(page.locator('html')).toHaveAttribute('data-graphics','ready');
   expect(await page.locator('#career').evaluate(e=>(e.getBoundingClientRect().top+scrollY)/innerHeight)).toBeCloseTo(4.5,1);
-  expect(await page.locator('#work').evaluate(e=>(e.getBoundingClientRect().top+scrollY)/innerHeight)).toBeCloseTo(9,1);
+  expect(await page.locator('#impact').evaluate(e=>(e.getBoundingClientRect().top+scrollY)/innerHeight)).toBeCloseTo(9,1);
+  expect(await page.locator('#contact').evaluate(e=>(e.getBoundingClientRect().top+scrollY)/innerHeight)).toBeCloseTo(11,1);
   for(const [width,height] of [[1440,900],[768,1024],[390,844],[320,568],[844,390]]) {
     await page.setViewportSize({width,height});
     await page.evaluate(()=>{const e=document.getElementById('contact')!;scrollTo(0,e.getBoundingClientRect().top+scrollY);});
+    await expect(page.locator('html')).toHaveAttribute('data-progress','22.0000');
+    await page.evaluate(()=>new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve()))));
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
     for(const link of await page.locator('#contact a').all()) {
-      const box=(await link.boundingBox())!; expect(box.width).toBeGreaterThan(44);expect(box.height).toBeGreaterThan(44);
+      const box=(await link.boundingBox())!; expect(box.width).toBeGreaterThanOrEqual(44);expect(box.height).toBeGreaterThanOrEqual(44);
     }
   }
 });

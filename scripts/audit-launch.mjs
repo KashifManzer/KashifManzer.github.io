@@ -12,7 +12,7 @@ try {
     page.on('console',message=>{if(message.type()==='error')errors.push(message.text());});
     await page.goto(origin+'/?still');
     await page.waitForFunction(()=>document.documentElement.dataset.graphics==='ready');
-    for(const id of ['opening','career','work','contact']) {
+    for(const id of ['opening','career','impact','contact']) {
       await page.evaluate(id=>{const section=document.getElementById(id);scrollTo(0,section.getBoundingClientRect().top+scrollY);},id);
       await page.waitForTimeout(600);
       await page.screenshot({path:`test-results/launch/${device}-${id}.png`});

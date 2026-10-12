@@ -55,7 +55,7 @@ export async function createCity(low: boolean, signal: AbortSignal) {
   fc.fillStyle='#25343e';fc.fillRect(0,0,1,256);fc.fillRect(0,0,256,1);
   const floorMap=new THREE.CanvasTexture(floorCanvas);floorMap.wrapS=floorMap.wrapT=THREE.RepeatWrapping;floorMap.repeat.set(80,80);floorMap.colorSpace=THREE.SRGBColorSpace;
   const groundMat=new THREE.MeshStandardNodeMaterial({map:floorMap,color:'#283844',roughness:.24,metalness:.55});
-  const ground=object(new THREE.PlaneGeometry(1200,1200),groundMat,0,-.1,-150);ground.rotation.x=-Math.PI/2;
+  const ground=object(new THREE.PlaneGeometry(1200,800),groundMat,0,-.1,5);ground.rotation.x=-Math.PI/2;
   // One sculpture per stop, with unbroken stone behind its silhouette. The
   // surrounding skyline stays distant; the HTML chapter owns all typography.
   const districts = [

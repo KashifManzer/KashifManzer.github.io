@@ -2,35 +2,41 @@
 import { socials } from '../data/profile';
 ---
 <section id="contact" class="contact" aria-labelledby="contact-title" tabindex="-1">
-  <div class="contact-intro">
-    <h2 id="contact-title">Good systems start<br />with a conversation.</h2>
-    <p>Have an engineering opportunity or a project in mind? Connect with me on LinkedIn, explore my code, or follow along.</p>
-  </div>
+  <h2 id="contact-title" class="sr-only">Connect with Kashif</h2>
+  <picture class="contact-poster" aria-hidden="true"><source media="(max-width:700px)" srcset="/direction/contact-mobile.webp" /><img src="/direction/contact-desktop.webp" width="1440" height="900" alt="" loading="lazy" /></picture>
   <nav class="social-links" aria-label="Connect with Kashif">
-    {socials.map(social => <a href={social.href} target="_blank" rel="noopener noreferrer me" style={`--social-accent:${social.color}`}>
-      <img src={`/social/${social.id}.svg`} width="28" height="28" alt="" loading="lazy" />
-      <span class="social-copy"><strong>{social.name}</strong><span>{social.handle}</span><small>{social.note}</small></span>
-      <svg class="social-arrow" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14" /></svg>
-      <span class="sr-only">(opens in a new tab)</span>
+    {socials.map(social => <a data-social={social.id} href={social.href} target="_blank" rel="noopener noreferrer me" aria-label={`${social.name} (opens in a new tab)`}>
+      <img class="asteroid-image" src={`/social/asteroid-${social.id}.webp`} width="320" height="320" alt="" loading="lazy" />
+      <span class="social-name">{social.name}<span aria-hidden="true"> ↗</span></span>
     </a>)}
   </nav>
 </section>
 <style>
-  .contact { padding:100px 0 110px; border-top:1px solid var(--edge); }
-  .contact-intro { display:grid; grid-template-columns:1.2fr 1fr; gap:8%; align-items:end; margin-bottom:52px; }
-  h2 { font-size:clamp(32px,4.2vw,62px); font-weight:440; line-height:1.12; letter-spacing:-.035em; margin:0; }
-  .contact-intro p { color:var(--ink-soft); font-size:16px; line-height:1.8; max-width:42ch; margin:0; }
-  .social-links { display:grid; grid-template-columns:1fr 1fr; gap:0 64px; }
-  .social-links a { display:flex; align-items:center; gap:24px; padding:30px 8px; border-top:1px solid var(--edge); text-decoration:none; transition:color .18s ease,background-color .18s ease; }
-  .social-links a:hover,.social-links a:focus-visible { color:var(--social-accent); background:#10202c; }
-  .social-links img { filter:invert(1); opacity:.85; flex-shrink:0; object-fit:contain; }
-  .social-copy { display:grid; gap:7px; }
-  .social-copy strong { font-size:23px; font-weight:500; }
-  .social-copy>span { color:var(--ink-soft); font-size:14px; }
-  .social-copy small { color:#c7d6e0; font-size:12px; }
-  .social-arrow { margin-left:auto; flex-shrink:0; transition:transform .18s ease; }
-  a:hover .social-arrow,a:focus-visible .social-arrow { transform:translate(3px,-3px); }
-  @media(max-width:700px) { .contact { padding:72px 0; } .contact-intro { display:block; margin-bottom:32px; } .contact-intro p { margin-top:24px; font-size:14px; } .social-links { grid-template-columns:1fr; } .social-links a { padding:24px 4px; gap:20px; } }
-  :global(html.reduced) .social-arrow { transition:none; transform:none; }
-  @media(prefers-reduced-motion:reduce) { .social-links a,.social-arrow { transition:none; } a:hover .social-arrow,a:focus-visible .social-arrow { transform:none; } }
+  .contact { position:relative; min-height:100svh; }
+  .contact-poster { position:absolute; inset:0; left:-7vw; width:100vw; height:100svh; z-index:-1; opacity:.28; }
+  .contact-poster img { width:100%; height:100%; object-fit:cover; }
+  .social-links { min-height:100svh; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); align-content:center; gap:24px; }
+  .social-links a { position:relative; display:flex; min-width:44px; min-height:44px; flex-direction:column; align-items:center; justify-content:center; color:#f4f6f8; text-decoration:none; cursor:pointer; border-radius:12px; }
+  .asteroid-image { display:block; width:100%; height:auto; object-fit:contain; }
+  .social-name { padding:8px 12px; font-size:14px; white-space:nowrap; background:#0b121b; border-radius:4px; }
+  .social-links a:hover .social-name { text-decoration:underline; text-underline-offset:4px; }
+  .social-links a:focus-visible { outline:2px solid #fff; outline-offset:5px; }
+  :global([data-graphics="ready"]:not(.reduced)) .contact-poster { visibility:hidden; }
+  :global([data-graphics="ready"]:not(.reduced)) .social-links { display:block; min-height:100svh; }
+  :global([data-graphics="ready"]:not(.reduced)) .social-links a { position:fixed; left:var(--rock-x); top:var(--rock-y); width:var(--rock-w); height:var(--rock-h); z-index:8; visibility:hidden; }
+  :global([data-graphics="ready"]:not(.reduced)[data-contact-targets="true"]) .social-links a { visibility:visible; }
+  :global([data-graphics="ready"]:not(.reduced)) .asteroid-image { display:none; }
+  :global([data-graphics="ready"]:not(.reduced)) .social-name { position:absolute; top:100%; margin-top:8px; opacity:0; }
+  :global([data-graphics="ready"]:not(.reduced)) a:hover .social-name,
+  :global([data-graphics="ready"]:not(.reduced)) a:focus-visible .social-name { opacity:1; }
+  @media(max-aspect-ratio:1) { .social-links { grid-template-columns:repeat(2,minmax(0,1fr)); gap:36px 20px; } }
+  @media(max-width:700px) { .contact-poster { left:-26px; } }
 </style>
+<script>
+  // A failed capture leaves a named, native link; never a broken-image placeholder.
+  for (const image of document.querySelectorAll<HTMLImageElement>('.asteroid-image')) {
+    const hide = () => { image.hidden = true; image.style.display = 'none'; };
+    image.addEventListener('error', hide, { once:true });
+    if (image.complete && !image.naturalWidth) hide();
+  }
+</script>

@@ -1,0 +1,54 @@
+[
+  {
+    "name": "mercury",
+    "url": "https://www.solarsystemscope.com/textures/download/2k_mercury.jpg"
+  },
+  {
+    "name": "venus_atmosphere",
+    "url": "https://www.solarsystemscope.com/textures/download/2k_venus_atmosphere.jpg"
+  },
+  {
+    "name": "mars",
+    "url": "https://www.solarsystemscope.com/textures/download/2k_mars.jpg"
+  },
+  {
+    "name": "saturn",
+    "url": "https://www.solarsystemscope.com/textures/download/2k_saturn.jpg"
+  },
+  {
+    "name": "uranus",
+    "url": "https://www.solarsystemscope.com/textures/download/2k_uranus.jpg"
+  },
+  {
+    "name": "neptune",
+    "url": "https://www.solarsystemscope.com/textures/download/2k_neptune.jpg"
+  },
+  {
+    "name": "sun",
+    "url": "https://www.solarsystemscope.com/textures/download/2k_sun.jpg"
+  },
+  {
+    "name": "earth_specular_map",
+    "url": "https://www.solarsystemscope.com/textures/download/2k_earth_specular_map.tif"
+  },
+  {
+    "name": "saturn_ring",
+    "url": "https://www.solarsystemscope.com/textures/download/2k_saturn_ring_alpha.png"
+  },
+  {
+    "name": "rock-diff",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rock_boulder_dry/rock_boulder_dry_diff_1k.jpg"
+  },
+  {
+    "name": "rock-nor_gl",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rock_boulder_dry/rock_boulder_dry_nor_gl_1k.jpg"
+  },
+  {
+    "name": "rock-rough",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rock_boulder_dry/rock_boulder_dry_rough_1k.jpg"
+  },
+  {
+    "name": "rock-ao",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rock_boulder_dry/rock_boulder_dry_ao_1k.jpg"
+  }
+]

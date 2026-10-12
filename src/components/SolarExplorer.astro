@@ -85,4 +85,17 @@ import { planets } from "../scene/planets";
     .solar-caption p { width: 100%; }
     .solar-bottom { padding-bottom: 10px; }
   }
+  @media (max-height: 650px) {
+    .solar-header { padding:10px 4vw; flex-shrink:0; }
+    .solar-eyebrow { display:none; }
+    h2 { font-size:20px; }
+    .solar-viewport { min-height:0; }
+    .solar-bottom { flex-shrink:0; padding-bottom:4px; }
+    nav button { min-height:44px; }
+    .solar-caption { padding-top:0; font-size:8px; }
+    .planet-name { font-size:32px; margin-bottom:8px; }
+    .planet-kind { margin-bottom:6px; font-size:9px; }
+    .planet-description { font-size:11px; line-height:1.5; }
+    .solar-overview { top:8px; padding:8px 12px; }
+  }
 </style>
